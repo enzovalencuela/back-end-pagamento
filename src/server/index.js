@@ -60,10 +60,15 @@ app.post("/api/payments/create", async (req, res) => {
           },
         ],
         back_urls: {
-          success: "https://pagamento-plataforma.vercel.app/success",
-          failure: "https://pagamento-plataforma.vercel.app/failure",
-          pending: "https://pagamento-plataforma.vercel.app/pending",
+          success:
+            "https://pagamento-plataforma.vercel.app/status?payment_id={id}",
+          failure:
+            "https://pagamento-plataforma.vercel.app/status?payment_id={id}",
+          pending:
+            "https://pagamento-plataforma.vercel.app/status?payment_id={id}",
         },
+        // O Mercado Pago agora irá redirecionar o cliente imediatamente
+        auto_return: "approved",
       },
     });
 
