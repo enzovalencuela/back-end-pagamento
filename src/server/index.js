@@ -107,6 +107,19 @@ app.post("/api/payments/webhook", async (req, res) => {
   res.status(200).send("OK");
 });
 
+app.get("/api/payments/status/:id", async (req, res) => {
+  try {
+    const paymentId = req.params.id;
+    const paymentClient = new Payment(client);
+    const paymentInfo = await paymentClient.get({ id: paymentId });
+
+    res.status(200).json(paymentInfo);
+  } catch (error) {
+    console.error("Erro ao buscar status do pagamento:", error);
+    res.status(500).json({ error: "Erro ao buscar status do pagamento" });
+  }
+});
+
 // Inicia a aplicação e a conexão com o banco de dados
 const startApp = async () => {
   await createTable();
