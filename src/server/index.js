@@ -96,7 +96,10 @@ app.post("/api/payments/webhook", async (req, res) => {
 
       console.log("Informações do pagamento:", paymentInfo);
 
-      if (paymentInfo && paymentInfo.status === "approved") {
+      if (
+        (paymentInfo && paymentInfo.status === "approved") ||
+        paymentInfo.date_approved !== null
+      ) {
         const amountPaid = paymentInfo.transaction_amount;
         const newBalance = await addBalance(userId, amountPaid);
 
