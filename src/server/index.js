@@ -60,9 +60,9 @@ app.post("/api/payments/create", async (req, res) => {
           },
         ],
         back_urls: {
-          success: "http://localhost:5173/success",
-          failure: "http://localhost:5173/failure",
-          pending: "http://localhost:5173/pending",
+          success: "https://pagamento-plataforma.vercel.app/success",
+          failure: "https://pagamento-plataforma.vercel.app/failure",
+          pending: "https://pagamento-plataforma.vercel.app/pending",
         },
       },
     });
