@@ -40,12 +40,18 @@ app.get("/api/user/balance", async (req, res) => {
 // Endpoint para criar o pagamento (preferência de checkout)
 app.post("/api/payments/create", async (req, res) => {
   try {
-    const { amount } = req.body;
+    // 1. Receba os dados do produto do front-end
+    const { title, unit_price, quantity } = req.body;
 
-    if (!amount || amount <= 0) {
-      return res
-        .status(400)
-        .json({ error: "O valor do pagamento é inválido." });
+    // 2. Valide os dados recebidos
+    if (
+      !title ||
+      !unit_price ||
+      !quantity ||
+      unit_price <= 0 ||
+      quantity <= 0
+    ) {
+      return res.status(400).json({ error: "Dados do item inválidos." });
     }
 
     const preference = new Preference(client);
@@ -54,9 +60,10 @@ app.post("/api/payments/create", async (req, res) => {
       body: {
         items: [
           {
-            title: "Adicionar Saldo",
-            unit_price: Number(amount),
-            quantity: 1,
+            // 3. Use os dados recebidos para criar o item de preferência
+            title: title,
+            unit_price: Number(unit_price),
+            quantity: Number(quantity),
           },
         ],
         back_urls: {
@@ -67,7 +74,6 @@ app.post("/api/payments/create", async (req, res) => {
           pending:
             "https://pagamento-plataforma.vercel.app/status?payment_id={id}",
         },
-        // O Mercado Pago agora irá redirecionar o cliente imediatamente
         auto_return: "approved",
       },
     });
