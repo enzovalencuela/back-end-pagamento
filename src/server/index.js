@@ -3,27 +3,92 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import { MercadoPagoConfig, Preference, Payment } from "mercadopago"; // Adicionada a classe Payment
-import { createTable, getBalance, addBalance } from "./database.js";
+import { MercadoPagoConfig, Preference, Payment } from "mercadopago";
+import {
+  createTable,
+  getBalance,
+  addBalance,
+  createUser,
+  findUserByEmail,
+} from "./database.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const userId = 1; // ID fixo do usuário para este exemplo
 
-// Configuração do Mercado Pago
 const client = new MercadoPagoConfig({
   accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN,
 });
 
-// Middlewares
 app.use(express.json());
 app.use(cors());
 
-// Rota de teste
 app.get("/", (req, res) => {
   res.send("Servidor do back-end rodando!");
+});
+
+// Rota para cadastro de usuário
+app.post("/api/register", async (req, res) => {
+  const { name, email, password } = req.body;
+
+  if (!name || !email || !password) {
+    return res
+      .status(400)
+      .json({ message: "Todos os campos são obrigatórios." });
+  }
+
+  const existingUser = await findUserByEmail(email);
+  if (existingUser) {
+    return res.status(409).json({ message: "Email já cadastrado." });
+  }
+
+  try {
+    const newUser = await createUser(name, email, password);
+    res.status(201).json({
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+    });
+  } catch (error) {
+    console.error("Erro ao registrar usuário:", error);
+    res.status(500).json({ message: "Erro interno do servidor." });
+  }
+});
+
+// Rota para login de usuário
+app.post("/api/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await findUserByEmail(email);
+
+    if (!user || user.password !== password) {
+      return res.status(401).json({ message: "Email ou senha incorretos." });
+    }
+
+    res.status(200).json({
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
+    });
+  } catch (error) {
+    console.error("Erro ao fazer login:", error);
+    res.status(500).json({ message: "Erro interno do servidor." });
+  }
+});
+
+app.get("/api/user/balance", async (req, res) => {
+  const userId = 1;
+  try {
+    const balance = await getBalance(userId);
+    res.status(200).json({ balance });
+  } catch (error) {
+    console.error("Erro ao buscar saldo:", error);
+    res.status(500).json({ error: "Erro interno do servidor." });
+  }
 });
 
 // Endpoint para buscar o saldo do usuário
@@ -40,10 +105,8 @@ app.get("/api/user/balance", async (req, res) => {
 // Endpoint para criar o pagamento (preferência de checkout)
 app.post("/api/payments/create", async (req, res) => {
   try {
-    // 1. Receba os dados do produto do front-end
     const { title, unit_price, quantity } = req.body;
 
-    // 2. Valide os dados recebidos
     if (
       !title ||
       !unit_price ||
@@ -60,7 +123,6 @@ app.post("/api/payments/create", async (req, res) => {
       body: {
         items: [
           {
-            // 3. Use os dados recebidos para criar o item de preferência
             title: title,
             unit_price: Number(unit_price),
             quantity: Number(quantity),
@@ -88,11 +150,9 @@ app.post("/api/payments/create", async (req, res) => {
   }
 });
 
-// A rota de Webhook que o Mercado Pago irá chamar
 app.post("/api/payments/webhook", async (req, res) => {
   console.log("Notificação de Webhook recebida:", req.body);
 
-  // A notificação de pagamento real tem o ID no corpo
   const paymentId = req.body.data.id || req.body.id;
 
   if (req.body.type === "payment" && paymentId) {

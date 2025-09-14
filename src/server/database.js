@@ -17,9 +17,13 @@ const pool = new Pool({
 export const createTable = async () => {
   try {
     const client = await pool.connect();
+    // Tabela 'users' agora inclui name, email e password
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
         balance DECIMAL(10, 2) NOT NULL DEFAULT 0.00
       );
     `);
@@ -27,6 +31,33 @@ export const createTable = async () => {
     client.release();
   } catch (err) {
     console.error("Erro ao criar a tabela:", err);
+  }
+};
+
+// Nova função: Inserir um novo usuário
+export const createUser = async (name, email, password) => {
+  const client = await pool.connect();
+  try {
+    const res = await client.query(
+      "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email",
+      [name, email, password]
+    );
+    return res.rows[0];
+  } finally {
+    client.release();
+  }
+};
+
+// Nova função: Buscar um usuário pelo email
+export const findUserByEmail = async (email) => {
+  const client = await pool.connect();
+  try {
+    const res = await client.query("SELECT * FROM users WHERE email = $1", [
+      email,
+    ]);
+    return res.rows[0];
+  } finally {
+    client.release();
   }
 };
 
