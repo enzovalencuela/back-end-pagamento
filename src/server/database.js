@@ -48,6 +48,19 @@ export const createUser = async (name, email, password) => {
   }
 };
 
+export const updateUserPassword = async (userId, newPassword) => {
+  const client = await pool.connect();
+  try {
+    const res = await client.query(
+      "UPDATE users SET password = $1 WHERE id = $2 RETURNING id, email",
+      [newPassword, userId]
+    );
+    return res.rows[0];
+  } finally {
+    client.release();
+  }
+};
+
 // Nova função: Buscar um usuário pelo email
 export const findUserByEmail = async (email) => {
   const client = await pool.connect();

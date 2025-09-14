@@ -10,6 +10,7 @@ import {
   addBalance,
   createUser,
   findUserByEmail,
+  updateUserPassword,
 } from "./database.js";
 
 dotenv.config();
@@ -76,6 +77,38 @@ app.post("/api/login", async (req, res) => {
     });
   } catch (error) {
     console.error("Erro ao fazer login:", error);
+    res.status(500).json({ message: "Erro interno do servidor." });
+  }
+});
+
+// --- Rota de Alteração de Senha ---
+
+app.post("/api/user/change-password", async (req, res) => {
+  const { userId, currentPassword, newPassword } = req.body;
+
+  if (!userId || !currentPassword || !newPassword) {
+    return res.status(400).json({ message: "Dados incompletos." });
+  }
+
+  try {
+    const user = await findUserByEmail(req.body.email);
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado." });
+    }
+
+    if (user.password !== currentPassword) {
+      return res.status(401).json({ message: "Senha atual incorreta." });
+    }
+
+    const updatedUser = await updateUserPassword(userId, newPassword);
+
+    if (updatedUser) {
+      res.status(200).json({ message: "Senha alterada com sucesso." });
+    } else {
+      res.status(500).json({ message: "Erro ao atualizar a senha." });
+    }
+  } catch (error) {
+    console.error("Erro ao alterar a senha:", error);
     res.status(500).json({ message: "Erro interno do servidor." });
   }
 });
