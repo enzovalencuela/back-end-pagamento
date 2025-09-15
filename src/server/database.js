@@ -93,4 +93,79 @@ export const addBalance = async (userId, amount) => {
   return res.rows[0] ? res.rows[0].balance : null;
 };
 
+// --- Funções de Carrinho ---
+
+// Função para adicionar um produto ao carrinho de um usuário
+export const addToCart = async (userId, productId) => {
+  try {
+    const result = await pool.query(
+      `INSERT INTO cart_items (user_id, product_id)
+       VALUES ($1, $2)
+       RETURNING *`,
+      [userId, productId]
+    );
+    return result.rows[0];
+  } catch (error) {
+    console.error("Erro ao adicionar produto ao carrinho:", error.message);
+    throw error;
+  }
+};
+
+// Função para remover um produto do carrinho de um usuário
+export const removeFromCart = async (userId, productId) => {
+  try {
+    const result = await pool.query(
+      `DELETE FROM cart_items
+       WHERE user_id = $1 AND product_id = $2
+       RETURNING *`,
+      [userId, productId]
+    );
+    return result.rows[0];
+  } catch (error) {
+    console.error("Erro ao remover produto do carrinho:", error.message);
+    throw error;
+  }
+};
+
+// Função para obter todos os itens do carrinho de um usuário
+export const getCartByUserId = async (userId) => {
+  try {
+    const result = await pool.query(
+      `SELECT product_id FROM cart_items WHERE user_id = $1`,
+      [userId]
+    );
+    // Retorna apenas os IDs dos produtos
+    return result.rows.map((row) => row.product_id);
+  } catch (error) {
+    console.error("Erro ao buscar carrinho:", error.message);
+    throw error;
+  }
+};
+
+// --- Funções de Produtos ---
+
+// Função para obter todos os produtos
+export const getAllProducts = async () => {
+  try {
+    const result = await pool.query("SELECT * FROM products ORDER BY id ASC");
+    return result.rows;
+  } catch (error) {
+    console.error("Erro ao buscar todos os produtos:", error.message);
+    throw error;
+  }
+};
+
+// Função para obter um produto por ID
+export const getProductById = async (productId) => {
+  try {
+    const result = await pool.query("SELECT * FROM products WHERE id = $1", [
+      productId,
+    ]);
+    return result.rows[0];
+  } catch (error) {
+    console.error("Erro ao buscar produto por ID:", error.message);
+    throw error;
+  }
+};
+
 export default pool;

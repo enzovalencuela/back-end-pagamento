@@ -5,12 +5,14 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { MercadoPagoConfig, Preference, Payment } from "mercadopago";
 import {
-  createTable,
-  getBalance,
-  addBalance,
   createUser,
   findUserByEmail,
   updateUserPassword,
+  addToCart,
+  removeFromCart,
+  getCartByUserId,
+  getAllProducts,
+  getProductById,
 } from "./database.js";
 
 dotenv.config();
@@ -224,6 +226,87 @@ app.get("/api/payments/status/:id", async (req, res) => {
   } catch (error) {
     console.error("Erro ao buscar status do pagamento:", error);
     res.status(500).json({ error: "Erro ao buscar status do pagamento" });
+  }
+});
+
+// --- Rotas de Produtos ---
+
+// Rota para obter todos os produtos
+app.get("/api/products", async (req, res) => {
+  try {
+    const products = await getAllProducts();
+    res.status(200).json(products);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// Rota para obter um produto específico por ID
+app.get("/api/products/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const product = await getProductById(id);
+    if (!product) {
+      return res.status(404).json({ message: "Produto não encontrado." });
+    }
+    res.status(200).json(product);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// --- Rotas de Carrinho ---
+
+// Rota para adicionar um produto ao carrinho
+app.post("/api/cart/add", async (req, res) => {
+  const { userId, productId } = req.body;
+  if (!userId || !productId) {
+    return res
+      .status(400)
+      .json({ message: "ID do usuário e do produto são obrigatórios." });
+  }
+  try {
+    const cartItem = await addToCart(userId, productId);
+    res.status(201).json(cartItem);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// Rota para remover um produto do carrinho
+app.post("/api/cart/remove", async (req, res) => {
+  const { userId, productId } = req.body;
+  if (!userId || !productId) {
+    return res
+      .status(400)
+      .json({ message: "ID do usuário e do produto são obrigatórios." });
+  }
+  try {
+    const removedItem = await removeFromCart(userId, productId);
+    if (!removedItem) {
+      return res
+        .status(404)
+        .json({ message: "Item não encontrado no carrinho." });
+    }
+    res.status(200).json({ message: "Produto removido com sucesso." });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// Rota para obter todos os itens do carrinho de um usuário
+app.get("/api/cart/:userId", async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const cartItems = await getCartByUserId(userId);
+    res.status(200).json(cartItems);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
   }
 });
 
