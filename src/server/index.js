@@ -29,11 +29,7 @@ const client = new MercadoPagoConfig({
 });
 
 app.use(express.json());
-app.use(
-  cors({
-    origin: "https://enzovalencuela-e-commerce.vercel.app",
-  })
-);
+app.use(cors());
 
 app.get("/", (req, res) => {
   res.send("Servidor do back-end rodando!");
