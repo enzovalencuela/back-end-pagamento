@@ -13,11 +13,10 @@ import {
   getCartByUserId,
   getAllProducts,
   getProductById,
-  addBalance,
   createTables,
-  addProducts, // Importa a nova função para adicionar produtos
+  addProducts,
 } from "./database.js";
-import productsToSeed from "./data/products.js"; // Importa o array de produtos
+import productsToSeed from "../data/products.js";
 
 dotenv.config();
 
