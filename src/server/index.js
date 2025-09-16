@@ -289,10 +289,24 @@ app.get("/api/cart/:userId", async (req, res) => {
 
 // Inicia a aplicação e a conexão com o banco de dados
 const startApp = async () => {
-  await createTables();
-  app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
-  });
+  try {
+    await createTables();
+
+    const existingProducts = await getAllProducts();
+    if (existingProducts.length === 0) {
+      console.log("Populando o banco de dados com produtos...");
+      await addProducts(productsToSeed);
+      console.log("Produtos inseridos com sucesso!");
+    } else {
+      console.log("O banco de dados já contém produtos.");
+    }
+
+    app.listen(PORT, () => {
+      console.log(`Servidor rodando na porta ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Erro ao iniciar a aplicação:", error);
+  }
 };
 
 startApp();
