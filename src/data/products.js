@@ -5,6 +5,8 @@ const products = [
     precoOriginal: "110,00",
     parcelamento: "3x de R$ 33,30",
     img: "https://cdn.awsli.com.br/2500x2500/1307/1307157/produto/138258516/cd9356d94a.jpg",
+    descricao:
+      "Fone de ouvido de alta qualidade, ideal para músicas e chamadas com clareza sonora. Design confortável para longas horas de uso.",
   },
   {
     titulo: "Mouse Gamer",
@@ -12,6 +14,8 @@ const products = [
     precoOriginal: "160,00",
     parcelamento: "5x de R$ 30,00",
     img: "https://img.terabyteshop.com.br/produto/g/mouse-gamer-razer-cobra-rgb-6-botoes-programaveis-8500-dpi-black-rz0104650100r3u_180092.jpg",
+    descricao:
+      "Mouse ergonômico com iluminação RGB, 6 botões programáveis e 8500 DPI para uma experiência de jogo precisa e responsiva.",
   },
   {
     titulo: "Teclado Mecânico",
@@ -19,6 +23,8 @@ const products = [
     precoOriginal: "280,00",
     parcelamento: "6x de R$ 41,67",
     img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRT7v4_hBRpFke1LOCdKc_wpQk8rkIifTQiNw&s",
+    descricao:
+      "Teclado mecânico com switches de alta durabilidade e feedback tátil, perfeito para jogos e digitação intensa.",
   },
   {
     titulo: "Monitor Ultrawide",
@@ -26,6 +32,8 @@ const products = [
     precoOriginal: "1700,00",
     parcelamento: "10x de R$ 150,00",
     img: "https://images.kabum.com.br/produtos/fotos/525503/monitor-gamer-aoc-23-8-full-hd-100hz-1ms-ips-displayport-e-hdmi-adaptive-sync-24g2e1_1710771975_gg.jpg",
+    descricao:
+      "Monitor gamer Full HD de 23.8 polegadas com taxa de atualização de 100Hz e tempo de resposta de 1ms, ideal para uma jogabilidade fluida.",
   },
   {
     titulo: "Webcam HD",
@@ -33,6 +41,8 @@ const products = [
     precoOriginal: "100,00",
     parcelamento: "3x de R$ 30,00",
     img: "https://m.media-amazon.com/images/I/61-K2lXmHQL._UF894,1000_QL80_.jpg",
+    descricao:
+      "Webcam com resolução HD para videochamadas nítidas e claras. Possui microfone embutido para praticidade.",
   },
   {
     titulo: "PlayStation 5",
@@ -40,6 +50,8 @@ const products = [
     precoOriginal: "3500,00",
     parcelamento: "10x de R$ 320,00",
     img: "https://m.media-amazon.com/images/I/41bsdF9lMPL._UF1000,1000_QL80_.jpg",
+    descricao:
+      "Console de última geração com gráficos em 4K, carregamento ultra-rápido e áudio 3D. Acompanha controle sem fio DualSense.",
   },
   {
     titulo: "Óculos VR Quest",
@@ -47,6 +59,8 @@ const products = [
     precoOriginal: "5500,00",
     parcelamento: "12x de R$ 480,00",
     img: "https://m.media-amazon.com/images/I/51pdPTbbjzL._UF894,1000_QL80_.jpg",
+    descricao:
+      "Dispositivo de realidade virtual sem fio, ideal para jogos, filmes e experiências imersivas. Confortável e fácil de usar.",
   },
   {
     titulo: "Cadeira Gamer",
@@ -54,6 +68,8 @@ const products = [
     precoOriginal: "1100,00",
     parcelamento: "10x de R$ 99,00",
     img: "https://lojagoldentec.vteximg.com.br/arquivos/ids/165902-600-600/image-cff5e7dc880d4c21bb11ed10984a894b.jpg?v=638483534503930000",
+    descricao:
+      "Cadeira ergonômica com design gamer, suporte lombar e ajuste de altura. Perfeita para sessões de jogo e trabalho prolongadas.",
   },
   {
     titulo: "Notebook Gamer",
@@ -61,6 +77,8 @@ const products = [
     precoOriginal: "6000,00",
     parcelamento: "12x de R$ 458,33",
     img: "https://images3.kabum.com.br/produtos/fotos/467613/notebook-gamer-asus-rog-strix-g16-rtx-4060-16gb-ram-brinde-controle-ps4-g614jv-n3094w_1721229589_gg.jpg",
+    descricao:
+      "Notebook de alta performance com processador Intel Core e placa de vídeo RTX, ideal para rodar os jogos mais exigentes.",
   },
   {
     titulo: "Notebook Gamer",
@@ -68,6 +86,8 @@ const products = [
     precoOriginal: "6200,00",
     parcelamento: "12x de R$ 478,33",
     img: "https://images.kabum.com.br/produtos/fotos/sync_mirakl/872622/xlarge/Notebook-Gamer-Asus-Rog-Strix-Scar-18-Intel-Core-Ultra-9-275hx-64GB-RAM-Nvidia-RTX5090-SSD-4TB-Tela-18-240Hz-Windows-11-Home-Black-G835lx_1755889506.jpg",
+    descricao:
+      "Notebook gamer com tela de 18 polegadas, 240Hz, 64GB de RAM e 4TB de SSD. Uma verdadeira máquina para o seu setup.",
   },
   {
     titulo: "Setup Gamer",
@@ -75,6 +95,8 @@ const products = [
     precoOriginal: "4400,00",
     parcelamento: "12x de R$ 378,33",
     img: "https://cdn.dooca.store/559/products/c1-2.png?v=1719521111&webp=0",
+    descricao:
+      "PC gamer completo com gabinete moderno e componentes de alto desempenho para uma experiência de jogo inigualável.",
   },
   {
     titulo: "Setup Gamer",
@@ -82,6 +104,8 @@ const products = [
     precoOriginal: "3200,00",
     parcelamento: "12x de R$ 268,33",
     img: "https://http2.mlstatic.com/D_730175-MLA87599323835_072025-C.jpg",
+    descricao:
+      "Setup gamer com componentes equilibrados para rodar a maioria dos jogos atuais. Ótimo custo-benefício.",
   },
   {
     titulo: "Setup Gamer",
@@ -89,6 +113,8 @@ const products = [
     precoOriginal: "2500,00",
     parcelamento: "12x de R$ 188,33",
     img: "https://m.media-amazon.com/images/I/71yKcQlBe3L.jpg",
+    descricao:
+      "PC gamer de entrada, ideal para quem quer começar a jogar. Roda jogos populares com boa performance.",
   },
   {
     titulo: "PC Gamer Intel 12900",
@@ -96,6 +122,8 @@ const products = [
     precoOriginal: "6500,00",
     parcelamento: "12x de R$ 618,33",
     img: "https://alfatecnologico.com.br/cdn/shop/files/minipc1site_2da5fa9b-4fb9-4c6a-ad47-264436d68aad_500x.jpg?v=1692657159",
+    descricao:
+      "PC gamer compacto e poderoso, com processador Intel Core i9 de 12ª geração e placa de vídeo de alta performance.",
   },
   {
     titulo: "Setup Gamer Completo",
@@ -103,6 +131,8 @@ const products = [
     precoOriginal: "4500,00",
     parcelamento: "12x de R$ 378,33",
     img: "https://shopinfo.vteximg.com.br/arquivos/ids/1718054-400-400/1.png?v=638877679507700000",
+    descricao:
+      "Setup completo com PC, monitor e acessórios. Pronto para jogar, trabalhar e estudar. Ótimo para quem busca praticidade.",
   },
   {
     titulo: "Volante Gamer com Pedal",
@@ -110,6 +140,8 @@ const products = [
     precoOriginal: "569,00",
     parcelamento: "6x de R$ 82,33",
     img: "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcR2Wd7wEYFlKi5jFJ_us0avuMblHasaxMQ--As_mA4clnPAmLVKeXAT5CbSu-XCfRJya2ipiLlYzaCl8KzuCuzRyQFl4NSpBZi41PHVGGvQ-p-dqE3pHSya2w",
+    descricao:
+      "Volante com rotação de 270° e pedais sensíveis. Ideal para jogos de corrida no PC ou console.",
   },
   {
     titulo: "Kit Mouse e Mousepad",
@@ -117,6 +149,8 @@ const products = [
     precoOriginal: "111,00",
     parcelamento: "6x de R$ 17,33",
     img: "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcT2z88fUKY-6moIHlqoGzDrE_uCFQWVoxEvftjHRERr8Q6cZRnFjQSNa6WWxZIli3qMqF9JnlRdWOnAjBjeRNwKu_gyjQOc0vAr6rdMAKFkkLUX8z3YFRz7Uw",
+    descricao:
+      "Kit com mouse gamer de alta precisão e mousepad com base de borracha antiderrapante. Perfeito para gamers.",
   },
   {
     titulo: "Headset Gamer Havit",
@@ -124,6 +158,8 @@ const products = [
     precoOriginal: "171,90",
     parcelamento: "12x de R$ 14,35",
     img: "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcQTTzbU4WohMOrxdqK5v7KaeD6XLBWM1_zsU6DRmTpThdqUncDzr85dV60lLU7SFmCz9Owasm-Iqt6yAkn0A2Z0hs0sezMSyv1PXbSLQDJinvp_s7WJLo1K1wQ",
+    descricao:
+      "Headset gamer com som surround, microfone ajustável e iluminação LED. Design confortável para longas sessões de jogo.",
   },
   {
     titulo: "Headset Gamer Logitech",
@@ -131,6 +167,8 @@ const products = [
     precoOriginal: "324,90",
     parcelamento: "12x de R$ 29,90",
     img: "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcTxLlA7eHCcgf1kjA0Va_ove87EzLbYnUjlFxuw_udFV6UWQV6OghM7yRy-xq9iH32H87wnSwSET-3EwnFH8fL-XjvpzZgJUBUOojktvJn4IubazW9fVxnE3A",
+    descricao:
+      "Headset Logitech com áudio de alta fidelidade e microfone com cancelamento de ruído. Conforto e clareza para a comunicação em jogos.",
   },
   {
     titulo: "Microfone Gamer Rgb",
@@ -138,6 +176,8 @@ const products = [
     precoOriginal: "154,90",
     parcelamento: "12x de R$ 12,90",
     img: "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcSZ8dXO0EfxjqEWs-VvV7U0fNtchj3R-IdVZtIVwaTncS3LPS2cyruayVgRa5bMffdWuZP40zwWuKeYrGpg43knVL-4CruN",
+    descricao:
+      "Microfone de alta sensibilidade com iluminação RGB. Perfeito para streaming, podcasts e chamadas em alta definição.",
   },
   {
     titulo: "Controle 8BitDo Ultimate",
@@ -145,6 +185,8 @@ const products = [
     precoOriginal: "184,90",
     parcelamento: "12x de R$ 16,90",
     img: "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQEmKI1haBD7B48t_neK4gr1LhqjMDEREREgSxf_5oFywMLCNkpW-Fy09xHxzziKGpQhlQtOfVKA06--EdVPWmNZAmzuVFbVw",
+    descricao:
+      "Controle sem fio com alta compatibilidade e botões programáveis. Bateria de longa duração para sessões de jogo estendidas.",
   },
   {
     titulo: "Mouse Pad com Led Rgb",
@@ -152,6 +194,8 @@ const products = [
     precoOriginal: "62,90",
     parcelamento: "6x de R$ 9,90",
     img: "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcQd6yYl49cAP-28HZxSqXmHnSgInDl3iE5rB2iiw7hMqlFi3p17J9xkw1jmM2JxUhLIVnCSM4Q01aGcizj7_2nlzUWu3A1bYo1WqyjHEYCwHugurmnaOnC9Kg",
+    descricao:
+      "Mousepad grande com iluminação LED RGB nas bordas. Superfície lisa para movimentos precisos do mouse.",
   },
   {
     titulo: "Kit Teclado e Mouse Gamer",
@@ -159,6 +203,8 @@ const products = [
     precoOriginal: "63,90",
     parcelamento: "6x de R$ 10,90",
     img: "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcSSdsAuWllgRwsTxEZo6kMAHmAG-43Zz-oGRzEQMI4uMQmsoxhbK3KOzUG-eaFsn3cIxYw1aPa_3nKfIDCiiqLiqkIN-LT4ZYkIGW4XlY3PADBMwhjemiAm",
+    descricao:
+      "Kit essencial para gamers iniciantes. Teclado com teclas de atalho e mouse ergonômico com DPI ajustável.",
   },
   {
     titulo: "Controle Wirelless Gamer",
@@ -166,6 +212,8 @@ const products = [
     precoOriginal: "193,90",
     parcelamento: "12x de R$ 15,90",
     img: "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTlIRvPWFP6BpLgKRpjvdW_quhMiljc6_pPvtE7Bdg7G8WsJ5Y4Pvc_OCJbokl1kg85GC811SvKmXKVSdTqc_NcvWK0zG6Z3T550vEfCbjPWJ9Vj96KG8WnBA",
+    descricao:
+      "Controle sem fio com design robusto e gatilhos responsivos. Compatível com PC, PlayStation e Nintendo Switch.",
   },
   {
     titulo: "Microfone Maono",
@@ -173,6 +221,8 @@ const products = [
     precoOriginal: "229,90",
     parcelamento: "12x de R$ 17,90",
     img: "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTx5vhqXWvHODONYux_BQmqOgKD7Qm4aD0I0wtAN0NHI4m1ey62n9hy20-jo1zohvaZtALwmJs-c97LPpgejI0_MrfSZ2LFu4y9kJukL_YHFMDhhSJKaPvwbQ",
+    descricao:
+      "Microfone condensador USB com suporte de mesa e filtro pop. Ideal para gravação de voz e podcasts.",
   },
   {
     titulo: "Fone De Ouvido Gamer",
@@ -180,6 +230,8 @@ const products = [
     precoOriginal: "129,90",
     parcelamento: "12x de R$ 10,90",
     img: "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRCTXZef71YBVcPh4AGJlUhHQGADubNuoACXKhYf6tWPLIZLvTDUr_7RGJwp7lhNgrAWNDB6AnSKWeDk76mgLBpCzUXA77VXwqZJLCS_mHMRicV1vtqlgwf-jE",
+    descricao:
+      "Fone de ouvido gamer com áudio de alta qualidade e graves potentes. Conector de 3.5mm compatível com diversas plataformas.",
   },
   {
     titulo: "Kit Mouse e Mousepad",
@@ -187,6 +239,8 @@ const products = [
     precoOriginal: "79,90",
     parcelamento: "6x de R$ 13,90",
     img: "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQqmPq-H4xFQo8L66M0mNW9RITeuZlL75L7d16wYr69jEWLWLOXnsNcy2LDfVCauzN_WMLn_uPi0HU_4kK-rRBBBv9XGsverkDxAO8N7m_k",
+    descricao:
+      "Kit de mousepad estendido com iluminação RGB e mouse gamer sem fio. Ideal para quem busca um setup minimalista.",
   },
   {
     titulo: "Fone De Ouvido Gamer",
@@ -194,6 +248,8 @@ const products = [
     precoOriginal: "219,90",
     parcelamento: "12x de R$ 16,90",
     img: "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcSacZCf-uht84OmNhvT5y6eMoPDjokVzkGSaDvDE-pS2G47MGxuQzUJGyUZxoRTGoUjkpWL23DXP8mtCxB4OkgxQQiJv79yZE51LypR2YVBCBDyz33S0HM5qQ",
+    descricao:
+      "Fone de ouvido gamer com som de alta definição e design leve. Microfone com cancelamento de ruído para comunicação clara.",
   },
 ];
 
