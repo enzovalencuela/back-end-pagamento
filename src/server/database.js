@@ -36,7 +36,7 @@ export const createTables = async () => {
         id SERIAL PRIMARY KEY,
         titulo VARCHAR(255) NOT NULL,
         preco DECIMAL(10, 2) NOT NULL,
-        preco_original DECIMAL(10, 2),
+        precoOriginal DECIMAL(10, 2),
         parcelamento VARCHAR(255),
         img VARCHAR(255) NOT NULL,
         descricao TEXT
