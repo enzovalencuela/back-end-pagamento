@@ -16,7 +16,7 @@ import {
   createTables,
   addProducts,
 } from "./database.js";
-import productsToSeed from "../data/products.js";
+import { products } from "./data/products.js";
 
 dotenv.config();
 
@@ -203,7 +203,7 @@ app.get("/api/payments/status/:id", async (req, res) => {
 // Rota para popular o banco de dados com os produtos (Seed)
 app.post("/api/products/seed", async (req, res) => {
   try {
-    await addProducts(productsToSeed);
+    await addProducts(products);
     res.status(201).json({ message: "Produtos inseridos com sucesso!" });
   } catch (err) {
     console.error("Erro ao popular o banco de dados:", err.message);
@@ -295,7 +295,7 @@ const startApp = async () => {
     const existingProducts = await getAllProducts();
     if (existingProducts.length === 0) {
       console.log("Populando o banco de dados com produtos...");
-      await addProducts(productsToSeed);
+      await addProducts(products);
       console.log("Produtos inseridos com sucesso!");
     } else {
       console.log("O banco de dados já contém produtos.");

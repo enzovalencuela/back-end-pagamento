@@ -1,11 +1,11 @@
 // routes/products.js
 
 import pool from "../server/database";
-import productsToSeed from "../data/products";
+import { products } from "./data/products.js";
 
 app.post("/api/seed/products", async (req, res) => {
   try {
-    for (const product of productsToSeed) {
+    for (const product of products) {
       await pool.query(
         "INSERT INTO products (titulo, preco, preco_original, parcelamento, img, descricao) VALUES ($1, $2, $3, $4, $5, $6)",
         [

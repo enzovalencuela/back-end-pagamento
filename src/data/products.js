@@ -196,3 +196,5 @@ const products = [
     img: "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcSacZCf-uht84OmNhvT5y6eMoPDjokVzkGSaDvDE-pS2G47MGxuQzUJGyUZxoRTGoUjkpWL23DXP8mtCxB4OkgxQQiJv79yZE51LypR2YVBCBDyz33S0HM5qQ",
   },
 ];
+
+export default products.
