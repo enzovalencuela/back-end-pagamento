@@ -1,10 +1,9 @@
 // routes/products.js
 
-const router = express.Router();
 import pool from "../server/database";
-const productsToSeed = require("../data/products");
+import productsToSeed from "../data/products";
 
-router.post("/seed", async (req, res) => {
+app.post("/api/seed/products", async (req, res) => {
   try {
     for (const product of productsToSeed) {
       await pool.query(

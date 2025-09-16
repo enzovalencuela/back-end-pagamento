@@ -13,7 +13,11 @@ import {
   getCartByUserId,
   getAllProducts,
   getProductById,
+  addBalance,
+  createTables,
+  addProducts, // Importa a nova função para adicionar produtos
 } from "./database.js";
+import productsToSeed from "./data/products.js"; // Importa o array de produtos
 
 dotenv.config();
 
@@ -35,21 +39,19 @@ app.get("/", (req, res) => {
   res.send("Servidor do back-end rodando!");
 });
 
-// Rota para cadastro de usuário
+// --- Rotas de Autenticação ---
+
 app.post("/api/register", async (req, res) => {
   const { name, email, password } = req.body;
-
   if (!name || !email || !password) {
     return res
       .status(400)
       .json({ message: "Todos os campos são obrigatórios." });
   }
-
   const existingUser = await findUserByEmail(email);
   if (existingUser) {
     return res.status(409).json({ message: "Email já cadastrado." });
   }
-
   try {
     const newUser = await createUser(name, email, password);
     res.status(201).json({
@@ -63,17 +65,13 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
-// Rota para login de usuário
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
-
   try {
     const user = await findUserByEmail(email);
-
     if (!user || user.password !== password) {
       return res.status(401).json({ message: "Email ou senha incorretos." });
     }
-
     res.status(200).json({
       user: {
         id: user.id,
@@ -87,27 +85,22 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-// --- Rota de Alteração de Senha ---
+// --- Rota de Alteração de Senha (Corrigida) ---
 
 app.post("/api/user/change-password", async (req, res) => {
   const { userId, currentPassword, newPassword } = req.body;
-
   if (!userId || !currentPassword || !newPassword) {
     return res.status(400).json({ message: "Dados incompletos." });
   }
-
   try {
-    const user = await findUserByEmail(req.body.email);
+    const user = await getBalance(userId); // Usa getBalance para buscar o usuário pelo ID
     if (!user) {
       return res.status(404).json({ message: "Usuário não encontrado." });
     }
-
     if (user.password !== currentPassword) {
       return res.status(401).json({ message: "Senha atual incorreta." });
     }
-
     const updatedUser = await updateUserPassword(userId, newPassword);
-
     if (updatedUser) {
       res.status(200).json({ message: "Senha alterada com sucesso." });
     } else {
@@ -119,8 +112,10 @@ app.post("/api/user/change-password", async (req, res) => {
   }
 });
 
-app.get("/api/user/balance", async (req, res) => {
-  const userId = 1;
+// --- Rota para Saldo do Usuário ---
+
+app.get("/api/user/balance/:userId", async (req, res) => {
+  const { userId } = req.params;
   try {
     const balance = await getBalance(userId);
     res.status(200).json({ balance });
@@ -130,22 +125,11 @@ app.get("/api/user/balance", async (req, res) => {
   }
 });
 
-// Endpoint para buscar o saldo do usuário
-app.get("/api/user/balance", async (req, res) => {
-  try {
-    const balance = await getBalance(userId);
-    res.status(200).json({ balance });
-  } catch (error) {
-    console.error("Erro ao buscar saldo:", error);
-    res.status(500).json({ error: "Erro interno do servidor." });
-  }
-});
+// --- Rotas de Pagamento do Mercado Pago ---
 
-// Endpoint para criar o pagamento (preferência de checkout)
 app.post("/api/payments/create", async (req, res) => {
   try {
     const { title, unit_price, quantity } = req.body;
-
     if (
       !title ||
       !unit_price ||
@@ -155,9 +139,7 @@ app.post("/api/payments/create", async (req, res) => {
     ) {
       return res.status(400).json({ error: "Dados do item inválidos." });
     }
-
     const preference = new Preference(client);
-
     const result = await preference.create({
       body: {
         items: [
@@ -178,7 +160,6 @@ app.post("/api/payments/create", async (req, res) => {
         auto_return: "approved",
       },
     });
-
     res.status(200).json({
       id: result.id,
       init_point: result.init_point,
@@ -191,32 +172,22 @@ app.post("/api/payments/create", async (req, res) => {
 
 app.post("/api/payments/webhook", async (req, res) => {
   console.log("Notificação de Webhook recebida:", req.body);
-
   const paymentId = req.body.data.id || req.body.id;
-
   if (req.body.type === "payment" && paymentId) {
     try {
       const paymentClient = new Payment(client);
       const paymentInfo = await paymentClient.get({ id: paymentId });
-
       console.log("Informações do pagamento:", paymentInfo);
-
       if (
         (paymentInfo && paymentInfo.status === "approved") ||
         paymentInfo.date_approved !== null
       ) {
         const amountPaid = paymentInfo.transaction_amount;
-        const newBalance = await addBalance(userId, amountPaid);
-
-        console.log(
-          `Saldo do usuário ${userId} atualizado. Novo saldo: R$${newBalance}`
-        );
       }
     } catch (error) {
       console.error("Erro ao processar o webhook:", error);
     }
   }
-
   res.status(200).send("OK");
 });
 
@@ -225,7 +196,6 @@ app.get("/api/payments/status/:id", async (req, res) => {
     const paymentId = req.params.id;
     const paymentClient = new Payment(client);
     const paymentInfo = await paymentClient.get({ id: paymentId });
-
     res.status(200).json(paymentInfo);
   } catch (error) {
     console.error("Erro ao buscar status do pagamento:", error);
@@ -234,6 +204,17 @@ app.get("/api/payments/status/:id", async (req, res) => {
 });
 
 // --- Rotas de Produtos ---
+
+// Rota para popular o banco de dados com os produtos (Seed)
+app.post("/api/products/seed", async (req, res) => {
+  try {
+    await addProducts(productsToSeed);
+    res.status(201).json({ message: "Produtos inseridos com sucesso!" });
+  } catch (err) {
+    console.error("Erro ao popular o banco de dados:", err.message);
+    res.status(500).send("Erro ao popular o banco de dados.");
+  }
+});
 
 // Rota para obter todos os produtos
 app.get("/api/products", async (req, res) => {
@@ -263,7 +244,6 @@ app.get("/api/products/:id", async (req, res) => {
 
 // --- Rotas de Carrinho ---
 
-// Rota para adicionar um produto ao carrinho
 app.post("/api/cart/add", async (req, res) => {
   const { userId, productId } = req.body;
   if (!userId || !productId) {
@@ -280,7 +260,6 @@ app.post("/api/cart/add", async (req, res) => {
   }
 });
 
-// Rota para remover um produto do carrinho
 app.post("/api/cart/remove", async (req, res) => {
   const { userId, productId } = req.body;
   if (!userId || !productId) {
@@ -302,7 +281,6 @@ app.post("/api/cart/remove", async (req, res) => {
   }
 });
 
-// Rota para obter todos os itens do carrinho de um usuário
 app.get("/api/cart/:userId", async (req, res) => {
   const { userId } = req.params;
   try {
@@ -316,7 +294,7 @@ app.get("/api/cart/:userId", async (req, res) => {
 
 // Inicia a aplicação e a conexão com o banco de dados
 const startApp = async () => {
-  await createTable();
+  await createTables();
   app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
   });

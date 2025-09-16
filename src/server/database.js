@@ -14,10 +14,11 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-export const createTable = async () => {
+export const createTables = async () => {
   try {
     const client = await pool.connect();
-    // Tabela 'users' agora inclui name, email e password
+
+    // Tabela 'users'
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -28,13 +29,38 @@ export const createTable = async () => {
       );
     `);
     console.log("Tabela 'users' verificada ou criada com sucesso!");
+
+    // Tabela 'products'
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS products (
+        id SERIAL PRIMARY KEY,
+        titulo VARCHAR(255) NOT NULL,
+        preco DECIMAL(10, 2) NOT NULL,
+        preco_original DECIMAL(10, 2),
+        parcelamento VARCHAR(255),
+        img VARCHAR(255) NOT NULL,
+        descricao TEXT
+      );
+    `);
+    console.log("Tabela 'products' verificada ou criada com sucesso!");
+
+    // Tabela 'cart_items' para gerenciar os itens do carrinho
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS cart_items (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+        UNIQUE (user_id, product_id)
+      );
+    `);
+    console.log("Tabela 'cart_items' verificada ou criada com sucesso!");
+
     client.release();
   } catch (err) {
-    console.error("Erro ao criar a tabela:", err);
+    console.error("Erro ao criar as tabelas:", err);
   }
 };
 
-// Nova função: Inserir um novo usuário
 export const createUser = async (name, email, password) => {
   const client = await pool.connect();
   try {
@@ -61,7 +87,6 @@ export const updateUserPassword = async (userId, newPassword) => {
   }
 };
 
-// Nova função: Buscar um usuário pelo email
 export const findUserByEmail = async (email) => {
   const client = await pool.connect();
   try {
@@ -95,7 +120,6 @@ export const addBalance = async (userId, amount) => {
 
 // --- Funções de Carrinho ---
 
-// Função para adicionar um produto ao carrinho de um usuário
 export const addToCart = async (userId, productId) => {
   try {
     const result = await pool.query(
@@ -111,7 +135,6 @@ export const addToCart = async (userId, productId) => {
   }
 };
 
-// Função para remover um produto do carrinho de um usuário
 export const removeFromCart = async (userId, productId) => {
   try {
     const result = await pool.query(
@@ -127,14 +150,12 @@ export const removeFromCart = async (userId, productId) => {
   }
 };
 
-// Função para obter todos os itens do carrinho de um usuário
 export const getCartByUserId = async (userId) => {
   try {
     const result = await pool.query(
       `SELECT product_id FROM cart_items WHERE user_id = $1`,
       [userId]
     );
-    // Retorna apenas os IDs dos produtos
     return result.rows.map((row) => row.product_id);
   } catch (error) {
     console.error("Erro ao buscar carrinho:", error.message);
@@ -144,7 +165,6 @@ export const getCartByUserId = async (userId) => {
 
 // --- Funções de Produtos ---
 
-// Função para obter todos os produtos
 export const getAllProducts = async () => {
   try {
     const result = await pool.query("SELECT * FROM products ORDER BY id ASC");
@@ -168,4 +188,25 @@ export const getProductById = async (productId) => {
   }
 };
 
-export default pool;
+export const addProducts = async (products) => {
+  const client = await pool.connect();
+  try {
+    const promises = products.map((product) => {
+      return client.query(
+        "INSERT INTO products (titulo, preco, preco_original, parcelamento, img, descricao) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+        [
+          product.titulo,
+          parseFloat(product.preco),
+          parseFloat(product.precoOriginal),
+          product.parcelamento,
+          product.img,
+          product.descricao,
+        ]
+      );
+    });
+    const results = await Promise.all(promises);
+    return results.map((res) => res.rows[0]);
+  } finally {
+    client.release();
+  }
+};
