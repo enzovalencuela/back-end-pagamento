@@ -1,7 +1,7 @@
 // routes/products.js
 
 import pool from "../server/database";
-import { products } from "./data/products.js";
+import { products } from "../data/products";
 
 app.post("/api/seed/products", async (req, res) => {
   try {

@@ -16,7 +16,7 @@ import {
   createTables,
   addProducts,
 } from "./database.js";
-import { products } from "./data/products.js";
+import { products } from "../data/products.js";
 
 dotenv.config();
 
