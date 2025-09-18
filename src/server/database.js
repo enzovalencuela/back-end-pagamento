@@ -18,19 +18,20 @@ export const createTables = async () => {
   try {
     const client = await pool.connect();
 
-    // Tabela 'users'
+    // Tabela 'users' (com a nova coluna 'role')
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
-        balance DECIMAL(10, 2) NOT NULL DEFAULT 0.00
+        balance DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+        role VARCHAR(50) NOT NULL DEFAULT 'user'
       );
     `);
     console.log("Tabela 'users' verificada ou criada com sucesso!");
 
-    // Tabela 'products'
+    // Tabela 'products' (com as novas colunas)
     await client.query(`
       CREATE TABLE IF NOT EXISTS products (
         id SERIAL PRIMARY KEY,
@@ -39,12 +40,15 @@ export const createTables = async () => {
         preco_original DECIMAL(10, 2),
         parcelamento VARCHAR(255),
         img VARCHAR(255) NOT NULL,
-        descricao TEXT
+        descricao TEXT,
+        categoria VARCHAR(255),
+        tags VARCHAR(255)[],
+        disponivel BOOLEAN NOT NULL DEFAULT TRUE
       );
     `);
     console.log("Tabela 'products' verificada ou criada com sucesso!");
 
-    // Tabela 'cart_items' para gerenciar os itens do carrinho
+    // Tabela 'cart_items' (sem alterações)
     await client.query(`
       CREATE TABLE IF NOT EXISTS cart_items (
         id SERIAL PRIMARY KEY,
@@ -60,7 +64,6 @@ export const createTables = async () => {
     console.error("Erro ao criar as tabelas:", err);
   }
 };
-
 export const createUser = async (name, email, password) => {
   const client = await pool.connect();
   try {
