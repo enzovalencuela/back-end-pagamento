@@ -187,20 +187,32 @@ export const getProductById = async (productId) => {
     throw error;
   }
 };
-
 export const addProducts = async (products) => {
   const client = await pool.connect();
   try {
     const promises = products.map((product) => {
+      // Converte preco e precoOriginal para float e tags para array
+      const tagsArray =
+        typeof product.tags === "string"
+          ? product.tags.split(",").map((tag) => tag.trim())
+          : product.tags;
+      const preco = parseFloat(product.preco);
+      const precoOriginal = product.preco_original
+        ? parseFloat(product.preco_original)
+        : null;
+
       return client.query(
-        "INSERT INTO products (titulo, preco, preco_original, parcelamento, img, descricao) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+        "INSERT INTO products (titulo, preco, preco_original, parcelamento, img, descricao, categoria, tags, disponivel) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *",
         [
           product.titulo,
-          parseFloat(product.preco),
-          parseFloat(product.precoOriginal),
+          preco,
+          precoOriginal,
           product.parcelamento,
           product.img,
           product.descricao,
+          product.categoria,
+          tagsArray,
+          product.disponivel,
         ]
       );
     });
@@ -212,25 +224,91 @@ export const addProducts = async (products) => {
 };
 
 export async function createProduct(productData) {
-  const { titulo, preco, precoOriginal, parcelamento, img, descricao } =
-    productData;
-  const result = await db.query(
-    "INSERT INTO products (titulo, preco, precoOriginal, parcelamento, img, descricao) VALUES (?, ?, ?, ?, ?, ?)",
-    [titulo, preco, precoOriginal, parcelamento, img, descricao]
-  );
-  return { id: result.insertId, ...productData };
+  const {
+    titulo,
+    preco,
+    preco_original,
+    parcelamento,
+    img,
+    descricao,
+    categoria,
+    tags,
+    disponivel,
+  } = productData;
+  const client = await pool.connect();
+  try {
+    const precoFloat = parseFloat(preco);
+    const precoOriginalFloat = preco_original
+      ? parseFloat(preco_original)
+      : null;
+    const tagsArray =
+      typeof tags === "string"
+        ? tags.split(",").map((tag) => tag.trim())
+        : tags;
+
+    const result = await client.query(
+      `INSERT INTO products (titulo, preco, preco_original, parcelamento, img, descricao, categoria, tags, disponivel) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+      [
+        titulo,
+        precoFloat,
+        precoOriginalFloat,
+        parcelamento,
+        img,
+        descricao,
+        categoria,
+        tagsArray,
+        disponivel,
+      ]
+    );
+    return result.rows[0];
+  } finally {
+    client.release();
+  }
 }
 
 // Atualizar um produto por ID
 export async function updateProduct(id, productData) {
-  const { titulo, preco, precoOriginal, parcelamento, img, descricao } =
-    productData;
-  const result = await db.query(
-    `UPDATE products SET titulo = ?, preco = ?, precoOriginal = ?, parcelamento = ?, img = ?, descricao = ? WHERE id = ?`,
-    [titulo, preco, precoOriginal, parcelamento, img, descricao, id]
-  );
-  if (result.affectedRows === 0) return null;
-  return { id, ...productData };
+  const {
+    titulo,
+    preco,
+    preco_original,
+    parcelamento,
+    img,
+    descricao,
+    categoria,
+    tags,
+    disponivel,
+  } = productData;
+  const client = await pool.connect();
+  try {
+    const precoFloat = parseFloat(preco);
+    const precoOriginalFloat = preco_original
+      ? parseFloat(preco_original)
+      : null;
+    const tagsArray =
+      typeof tags === "string"
+        ? tags.split(",").map((tag) => tag.trim())
+        : tags;
+
+    const result = await client.query(
+      `UPDATE products SET titulo = $1, preco = $2, preco_original = $3, parcelamento = $4, img = $5, descricao = $6, categoria = $7, tags = $8, disponivel = $9 WHERE id = $10 RETURNING *`,
+      [
+        titulo,
+        precoFloat,
+        precoOriginalFloat,
+        parcelamento,
+        img,
+        descricao,
+        categoria,
+        tagsArray,
+        disponivel,
+        id,
+      ]
+    );
+    return result.rows.length ? result.rows[0] : null;
+  } finally {
+    client.release();
+  }
 }
 
 export async function deleteProduct(id) {

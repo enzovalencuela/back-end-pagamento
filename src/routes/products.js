@@ -7,14 +7,17 @@ app.post("/api/seed/products", async (req, res) => {
   try {
     for (const product of productsToSeed) {
       await pool.query(
-        "INSERT INTO products (titulo, preco, preco_original, parcelamento, img, descricao) VALUES ($1, $2, $3, $4, $5, $6)",
+        "INSERT INTO products (titulo, preco, preco_original, parcelamento, img, descricao, categoria, tags, disponivel) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
         [
           product.titulo,
           product.preco,
-          product.precoOriginal,
+          product.preco_original,
           product.parcelamento,
           product.img,
           product.descricao,
+          product.categoria,
+          product.tags,
+          product.disponivel,
         ]
       );
     }
