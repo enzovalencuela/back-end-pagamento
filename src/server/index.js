@@ -15,6 +15,9 @@ import {
   getProductById,
   createTables,
   addProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
 } from "./database.js";
 import productsToSeed from "../data/products.js";
 
@@ -72,6 +75,7 @@ app.post("/api/login", async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (error) {
@@ -211,6 +215,21 @@ app.post("/api/products/seed", async (req, res) => {
   }
 });
 
+app.post("/api/products/add", async (req, res) => {
+  const { titulo, preco, precoOriginal, parcelamento, img, descricao } =
+    req.body;
+  if (!titulo || !preco || !img || !descricao) {
+    return res.status(400).json({ message: "Dados do produto incompletos." });
+  }
+  try {
+    const newProduct = await createProduct(req.body); // Você precisará criar a função createProduct
+    res.status(201).json(newProduct);
+  } catch (err) {
+    console.error("Erro ao adicionar produto:", err.message);
+    res.status(500).send("Server error");
+  }
+});
+
 // Rota para obter todos os produtos
 app.get("/api/products", async (req, res) => {
   try {
@@ -233,6 +252,34 @@ app.get("/api/products/:id", async (req, res) => {
     res.status(200).json(product);
   } catch (err) {
     console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+app.put("/api/products/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const updatedProduct = await updateProduct(id, req.body);
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "Produto não encontrado." });
+    }
+    res.status(200).json(updatedProduct);
+  } catch (err) {
+    console.error("Erro ao atualizar produto:", err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+app.delete("/api/products/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const deleted = await deleteProduct(id);
+    if (!deleted) {
+      return res.status(404).json({ message: "Produto não encontrado." });
+    }
+    res.status(200).json({ message: "Produto removido com sucesso." });
+  } catch (err) {
+    console.error("Erro ao remover produto:", err.message);
     res.status(500).send("Server error");
   }
 });

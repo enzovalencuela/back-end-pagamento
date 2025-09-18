@@ -210,3 +210,30 @@ export const addProducts = async (products) => {
     client.release();
   }
 };
+
+export async function createProduct(productData) {
+  const { titulo, preco, precoOriginal, parcelamento, img, descricao } =
+    productData;
+  const result = await db.query(
+    "INSERT INTO products (titulo, preco, precoOriginal, parcelamento, img, descricao) VALUES (?, ?, ?, ?, ?, ?)",
+    [titulo, preco, precoOriginal, parcelamento, img, descricao]
+  );
+  return { id: result.insertId, ...productData };
+}
+
+// Atualizar um produto por ID
+export async function updateProduct(id, productData) {
+  const { titulo, preco, precoOriginal, parcelamento, img, descricao } =
+    productData;
+  const result = await db.query(
+    `UPDATE products SET titulo = ?, preco = ?, precoOriginal = ?, parcelamento = ?, img = ?, descricao = ? WHERE id = ?`,
+    [titulo, preco, precoOriginal, parcelamento, img, descricao, id]
+  );
+  if (result.affectedRows === 0) return null;
+  return { id, ...productData };
+}
+
+export async function deleteProduct(id) {
+  const result = await db.query("DELETE FROM products WHERE id = ?", [id]);
+  return result.affectedRows > 0;
+}
