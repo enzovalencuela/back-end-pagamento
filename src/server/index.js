@@ -334,7 +334,7 @@ app.get("/api/products/search", async (req, res) => {
   try {
     const { rows } = await pool.query(query, params);
     res.json(rows);
-  } catch {
+  } catch (err) {
     console.error("Erro na busca de produtos:", err.message);
     res.status(500).json({ message: "Erro interno do servidor na busca." });
   }
