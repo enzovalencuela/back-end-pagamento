@@ -318,7 +318,9 @@ app.get("/api/products/search", async (req, res) => {
   const params = [];
   let paramIndex = 1;
 
-  const whereClauses = ["disponivel = true"];
+  const whereClauses = [];
+
+  whereClauses.push("disponivel = true");
 
   if (q) {
     whereClauses.push(
@@ -334,13 +336,17 @@ app.get("/api/products/search", async (req, res) => {
     paramIndex++;
   }
 
-  const query = `SELECT * FROM products WHERE ${whereClauses.join(" AND ")}`;
+  let query = "SELECT * FROM products";
+  if (whereClauses.length > 0) {
+    query += ` WHERE ${whereClauses.join(" AND ")}`;
+  }
 
   try {
     const { rows } = await pool.query(query, params);
     res.json(rows);
   } catch (err) {
-    console.error("Erro na busca de produtos:", err.message);
+    console.error("Erro na busca de produtos:", err);
+    console.error("Query executada:", query, params);
     res.status(500).json({ message: "Erro interno do servidor na busca." });
   }
 });
