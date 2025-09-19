@@ -194,13 +194,12 @@ export const addProducts = async (products) => {
   const client = await pool.connect();
   try {
     const promises = products.map((product) => {
-      // Converte preco e precoOriginal para float e tags para array
       const tagsArray =
         typeof product.tags === "string"
           ? product.tags.split(",").map((tag) => tag.trim())
           : product.tags;
       const preco = parseFloat(product.preco);
-      const precoOriginal = product.preco_original
+      const preco_original = product.preco_original
         ? parseFloat(product.preco_original)
         : null;
 
@@ -209,7 +208,7 @@ export const addProducts = async (products) => {
         [
           product.titulo,
           preco,
-          precoOriginal,
+          preco_original,
           product.parcelamento,
           product.img,
           product.descricao,

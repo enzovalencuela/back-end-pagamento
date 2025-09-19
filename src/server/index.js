@@ -315,21 +315,26 @@ app.delete("/api/products/:id", async (req, res) => {
 
 app.get("/api/products/search", async (req, res) => {
   const { q, categoria } = req.query;
-  let query = "SELECT * FROM products WHERE disponivel = true";
   const params = [];
   let paramIndex = 1;
 
+  const whereClauses = ["disponivel = true"];
+
   if (q) {
-    query += ` AND (titulo ILIKE $${paramIndex} OR descricao ILIKE $${paramIndex} OR categoria ILIKE $${paramIndex} OR tags::text ILIKE $${paramIndex})`;
+    whereClauses.push(
+      `(titulo ILIKE $${paramIndex} OR descricao ILIKE $${paramIndex} OR categoria ILIKE $${paramIndex} OR tags::text ILIKE $${paramIndex})`
+    );
     params.push(`%${q}%`);
     paramIndex++;
   }
 
   if (categoria) {
-    query += ` AND categoria = $${paramIndex}`;
+    whereClauses.push(`categoria = $${paramIndex}`);
     params.push(categoria);
     paramIndex++;
   }
+
+  const query = `SELECT * FROM products WHERE ${whereClauses.join(" AND ")}`;
 
   try {
     const { rows } = await pool.query(query, params);
