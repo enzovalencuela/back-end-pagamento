@@ -148,7 +148,7 @@ app.get("/api/user/payments", async (req, res) => {
 
 // --- Rotas de Pagamento do Mercado Pago ---
 
-app.post("api/payments/create", async (req, res) => {
+app.post("/api/payments/create", async (req, res) => {
   const { items, user_id, email, payment_method, card_token } = req.body;
 
   if (!items || items.length === 0 || !user_id || !email) {
