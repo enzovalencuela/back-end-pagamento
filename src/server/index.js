@@ -221,10 +221,10 @@ app.post("/api/products/add", async (req, res) => {
     "Áudio",
     "Periféricos",
     "Consoles",
-    "VR",
+    "Realidade VR",
     "Acessórios",
     "Notebooks",
-    "Setup",
+    "Setups",
     "Monitor",
   ];
 
