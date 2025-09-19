@@ -270,6 +270,44 @@ app.get("/api/products", async (req, res) => {
   }
 });
 
+app.get("/api/products/search", async (req, res) => {
+  const { q, categoria } = req.query;
+  const params = [];
+  let paramIndex = 1;
+
+  const whereClauses = [];
+
+  whereClauses.push("disponivel = true");
+
+  if (q) {
+    whereClauses.push(
+      `(titulo ILIKE $${paramIndex} OR descricao ILIKE $${paramIndex} OR categoria ILIKE $${paramIndex} OR tags::text ILIKE $${paramIndex})`
+    );
+    params.push(`%${q}%`);
+    paramIndex++;
+  }
+
+  if (categoria) {
+    whereClauses.push(`categoria = $${paramIndex}`);
+    params.push(categoria);
+    paramIndex++;
+  }
+
+  let query = "SELECT * FROM products";
+  if (whereClauses.length > 0) {
+    query += ` WHERE ${whereClauses.join(" AND ")}`;
+  }
+
+  try {
+    const { rows } = await pool.query(query, params);
+    res.json(rows);
+  } catch (err) {
+    console.error("Erro na busca de produtos:", err);
+    console.error("Query executada:", query, params);
+    res.status(500).json({ message: "Erro interno do servidor na busca." });
+  }
+});
+
 // Rota para obter um produto específico por ID
 app.get("/api/products/:id", async (req, res) => {
   const { id } = req.params;
@@ -310,44 +348,6 @@ app.delete("/api/products/:id", async (req, res) => {
   } catch (err) {
     console.error("Erro ao remover produto:", err.message);
     res.status(500).send("Server error");
-  }
-});
-
-app.get("/api/products/search", async (req, res) => {
-  const { q, categoria } = req.query;
-  const params = [];
-  let paramIndex = 1;
-
-  const whereClauses = [];
-
-  whereClauses.push("disponivel = true");
-
-  if (q) {
-    whereClauses.push(
-      `(titulo ILIKE $${paramIndex} OR descricao ILIKE $${paramIndex} OR categoria ILIKE $${paramIndex} OR tags::text ILIKE $${paramIndex})`
-    );
-    params.push(`%${q}%`);
-    paramIndex++;
-  }
-
-  if (categoria) {
-    whereClauses.push(`categoria = $${paramIndex}`);
-    params.push(categoria);
-    paramIndex++;
-  }
-
-  let query = "SELECT * FROM products";
-  if (whereClauses.length > 0) {
-    query += ` WHERE ${whereClauses.join(" AND ")}`;
-  }
-
-  try {
-    const { rows } = await pool.query(query, params);
-    res.json(rows);
-  } catch (err) {
-    console.error("Erro na busca de produtos:", err);
-    console.error("Query executada:", query, params);
-    res.status(500).json({ message: "Erro interno do servidor na busca." });
   }
 });
 
