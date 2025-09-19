@@ -231,11 +231,12 @@ app.post("/api/products/add", async (req, res) => {
     !titulo ||
     !preco ||
     preco_original ||
-    parcelamento ||
+    !parcelamento ||
     !img ||
     !descricao ||
-    categoria ||
-    tags
+    !categoria ||
+    !tags ||
+    disponivel
   ) {
     return res.status(400).json({ message: "Dados do produto incompletos." });
   }
