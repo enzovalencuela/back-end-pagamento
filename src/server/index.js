@@ -160,11 +160,10 @@ app.post("/api/payments/create", async (req, res) => {
       body: {
         items: items,
         back_urls: {
-          success: `https://enzovalencuela-e-commerce.vercel.app/status?payment_id=:payment_id`,
-          failure: `https://enzovalencuela-e-commerce.vercel.app/status?payment_id=:payment_id`,
-          pending: `https://enzovalencuela-e-commerce.vercel.app/status?payment_id=:payment_id`,
+          success: `https://enzovalencuela-e-commerce.vercel.app/status`,
+          failure: `https://enzovalencuela-e-commerce.vercel.app/status`,
+          pending: `https://enzovalencuela-e-commerce.vercel.app/status`,
         },
-
         auto_return: "approved",
         metadata: {
           user_id: user_id,
