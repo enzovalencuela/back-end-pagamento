@@ -227,9 +227,29 @@ app.post("/api/products/add", async (req, res) => {
     tags,
     disponivel,
   } = req.body;
+
+  const categoriasPermitidas = [
+    "Áudio",
+    "Periféricos",
+    "Consoles",
+    "VR",
+    "Acessórios",
+    "Notebooks",
+    "Setup",
+    "Monitor",
+  ];
+
   if (!titulo || !preco || !img || !descricao || !categoria) {
     return res.status(400).json({ message: "Dados do produto incompletos." });
   }
+
+  if (!categoriasPermitidas.includes(categoria)) {
+    return res.status(400).json({
+      message:
+        "Categoria inválida. Por favor, selecione uma categoria da lista permitida.",
+    });
+  }
+
   try {
     const newProduct = await createProduct(req.body);
     res.status(201).json(newProduct);
