@@ -227,15 +227,7 @@ app.post("/api/products/add", async (req, res) => {
     tags,
     disponivel,
   } = req.body;
-  if (
-    !titulo ||
-    !preco ||
-    !parcelamento ||
-    !img ||
-    !descricao ||
-    !categoria ||
-    !tags
-  ) {
+  if (!titulo || !preco || !img || !descricao || !categoria) {
     return res.status(400).json({ message: "Dados do produto incompletos." });
   }
   try {
