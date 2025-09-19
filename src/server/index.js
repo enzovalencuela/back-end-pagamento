@@ -313,6 +313,32 @@ app.delete("/api/products/:id", async (req, res) => {
   }
 });
 
+app.get("/api/products/search", async (req, res) => {
+  const { q, categoria } = req.query;
+  let query = "SELECT * FROM products WHERE disponivel = true";
+  const params = [];
+  let paramIndex = 1;
+
+  if (q) {
+    query += `AND (titulo ILIKE $${paramIndex} OR descricao ILIKE $${paramIndex} OR tags::text ILIKE $${paramIndex})`;
+    params.push(`%${q}%`);
+    paramIndex++;
+  }
+
+  if (categoria) {
+    query += `AND categoria = $${paramIndex}`;
+    params.push(categoria);
+  }
+
+  try {
+    const { rows } = await pool.query(query, params);
+    res.json(rows);
+  } catch {
+    console.error("Erro na busca de produtos:", err.message);
+    res.status(500).json({ message: "Erro interno do servidor na busca." });
+  }
+});
+
 // --- Rotas de Carrinho ---
 
 app.post("/api/cart/add", async (req, res) => {
