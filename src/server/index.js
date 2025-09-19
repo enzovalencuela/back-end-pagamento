@@ -216,13 +216,31 @@ app.post("/api/products/seed", async (req, res) => {
 });
 
 app.post("/api/products/add", async (req, res) => {
-  const { titulo, preco, precoOriginal, parcelamento, img, descricao } =
-    req.body;
-  if (!titulo || !preco || !img || !descricao) {
+  const {
+    titulo,
+    preco,
+    preco_original,
+    parcelamento,
+    img,
+    descricao,
+    categoria,
+    tags,
+    disponivel,
+  } = req.body;
+  if (
+    !titulo ||
+    !preco ||
+    preco_original ||
+    parcelamento ||
+    !img ||
+    !descricao ||
+    categoria ||
+    tags
+  ) {
     return res.status(400).json({ message: "Dados do produto incompletos." });
   }
   try {
-    const newProduct = await createProduct(req.body); // Você precisará criar a função createProduct
+    const newProduct = await createProduct(req.body);
     res.status(201).json(newProduct);
   } catch (err) {
     console.error("Erro ao adicionar produto:", err.message);
