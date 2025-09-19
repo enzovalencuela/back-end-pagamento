@@ -326,7 +326,7 @@ app.get("/api/products/search", async (req, res) => {
   }
 
   if (categoria) {
-    query += `AND categoria = $${paramIndex}`;
+    query += ` AND categoria = $${paramIndex}`;
     params.push(categoria);
     paramIndex++;
   }
