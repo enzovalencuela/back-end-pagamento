@@ -147,15 +147,21 @@ app.get("/api/user/payments", async (req, res) => {
 });
 
 // --- Rotas de Pagamento do Mercado Pago ---
-
 app.post("/api/payments/create", async (req, res) => {
   const { items, user_id, email, payment_method, card_token } = req.body;
-  const totalAmount = items.reduce((sum, i) => sum + i.unit_price, 0);
 
-  if (!items || items.length === 0 || totalAmount <= 0) {
+  if (!items || items.length === 0) {
     return res
       .status(400)
       .json({ error: "Dados dos itens incompletos ou inválidos." });
+  }
+
+  const totalAmount = items.reduce((sum, i) => sum + i.unit_price, 0);
+
+  if (totalAmount <= 0) {
+    return res
+      .status(400)
+      .json({ error: "O valor total do pagamento deve ser maior que zero." });
   }
 
   try {
