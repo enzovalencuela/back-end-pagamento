@@ -234,7 +234,8 @@ app.post("/api/products/add", async (req, res) => {
     !img ||
     !descricao ||
     !categoria ||
-    !tags
+    !tags ||
+    disponivel === undefined
   ) {
     return res.status(400).json({ message: "Dados do produto incompletos." });
   }
