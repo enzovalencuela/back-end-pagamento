@@ -314,6 +314,16 @@ export async function updateProduct(id, productData) {
 }
 
 export async function deleteProduct(id) {
-  const result = await db.query("DELETE FROM products WHERE id = ?", [id]);
-  return result.affectedRows > 0;
+  const client = await pool.connect();
+  try {
+    const result = await client.query(
+      "DELETE FROM products WHERE id = $1 RETURNING *",
+      [id]
+    );
+    return result.rowCount > 0;
+  } finally {
+    client.release();
+  }
 }
+
+export default pool;

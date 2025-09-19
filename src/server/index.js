@@ -3,6 +3,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import pool from "./database.js";
 import { MercadoPagoConfig, Preference, Payment } from "mercadopago";
 import {
   createUser,
