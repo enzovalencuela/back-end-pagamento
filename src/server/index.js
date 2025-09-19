@@ -151,8 +151,14 @@ app.get("/api/user/payments", async (req, res) => {
 app.post("/api/payments/create", async (req, res) => {
   const { items, user_id, email, payment_method, card_token } = req.body;
 
-  if (!items || items.length === 0 || !user_id || !email) {
-    return res.status(400).json({ error: "Dados incompletos." });
+  if (
+    !items ||
+    items.length === 0 ||
+    items.some((i) => typeof i.unit_price !== "number" || isNaN(i.unit_price))
+  ) {
+    return res
+      .status(400)
+      .json({ error: "Dados dos itens incompletos ou inválidos." });
   }
 
   const totalAmount = items.reduce((sum, i) => sum + i.unit_price, 0);
