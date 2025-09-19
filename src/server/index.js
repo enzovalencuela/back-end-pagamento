@@ -4,7 +4,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import pool from "./database.js";
-import { MercadoPagoConfig, Preference, Payment } from "mercadopago";
+import { MercadoPagoConfig, Payment } from "mercadopago";
 import {
   createUser,
   findUserByEmail,
@@ -147,112 +147,117 @@ app.get("/api/user/payments", async (req, res) => {
 });
 
 // --- Rotas de Pagamento do Mercado Pago ---
-app.post("/api/payments/create", async (req, res) => {
-  try {
-    const { items, user_id } = req.body;
 
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ error: "Dados do item inválidos." });
+app.post("api/payments/create", async (req, res) => {
+  const { items, user_id, email, payment_method, card_token } = req.body;
+
+  if (!items || items.length === 0 || !user_id || !email) {
+    return res.status(400).json({ error: "Dados incompletos." });
+  }
+
+  const totalAmount = items.reduce((sum, i) => sum + i.unit_price, 0);
+
+  try {
+    const paymentClient = new Payment(client);
+
+    const paymentPayload = {
+      transaction_amount: totalAmount,
+      description: "Compra no E-Commerce",
+      payer: {
+        email,
+      },
+      metadata: {
+        user_id,
+      },
+    };
+
+    // PIX
+    if (payment_method === "pix") {
+      paymentPayload.payment_method_id = "pix";
     }
 
-    const preference = new Preference(client);
-    const result = await preference.create({
-      body: {
-        items: items,
-        back_urls: {
-          success: `https://enzovalencuela-e-commerce.vercel.app/status?payment_id=:payment_id`,
-          failure: `https://enzovalencuela-e-commerce.vercel.app/status?payment_id=:payment_id`,
-          pending: `https://enzovalencuela-e-commerce.vercel.app/status?payment_id=:payment_id`,
-        },
-        auto_return: "approved",
-        metadata: {
-          user_id: user_id,
-        },
-      },
-    });
+    // Cartão
+    if (payment_method === "card" && card_token) {
+      paymentPayload.token = card_token;
+      paymentPayload.payment_method_id = req.body.card_brand;
+      paymentPayload.installments = 1;
+    }
+
+    const paymentResponse = await paymentClient.create(paymentPayload);
 
     res.status(200).json({
-      id: result.id,
-      init_point: result.init_point,
+      payment: paymentResponse,
     });
-  } catch (error) {
-    console.error("Erro ao criar preferência de pagamento:", error);
-    res.status(500).json({ error: "Erro interno do servidor." });
+  } catch (err) {
+    console.error("Erro ao criar pagamento:", err);
+    res.status(500).json({ error: "Erro ao criar pagamento" });
   }
 });
 
 app.post("/api/payments/webhook", async (req, res) => {
-  console.log("Notificação de Webhook recebida:", req.body);
+  console.log("Webhook recebido:", req.body);
+
   const paymentId = req.body.data?.id || req.body.id;
+  if (!paymentId) return res.status(400).send("No payment id");
 
-  if (req.body.type === "payment" && paymentId) {
-    let dbClient;
+  try {
+    const paymentClient = new Payment(client);
+    const paymentInfo = await paymentClient.get({ id: paymentId });
+    if (!paymentInfo) return res.status(404).send("Pagamento não encontrado");
+
+    const userId = paymentInfo.metadata?.user_id;
+    const amount = paymentInfo.transaction_amount;
+    const status = paymentInfo.status;
+
+    const dbClient = await pool.connect();
     try {
-      const paymentClient = new Payment(client);
-      const paymentInfo = await paymentClient.get({ id: paymentId });
-      console.log("Informações do pagamento:", paymentInfo);
+      await dbClient.query(
+        `INSERT INTO payments (user_id, amount, currency, status, provider, provider_payment_id)
+         VALUES ($1,$2,$3,$4,$5,$6)
+         ON CONFLICT (provider_payment_id)
+         DO UPDATE SET status = EXCLUDED.status, updated_at = NOW()`,
+        [
+          userId,
+          amount,
+          paymentInfo.currency_id,
+          status,
+          "mercadopago",
+          paymentInfo.id,
+        ]
+      );
 
-      if (paymentInfo) {
-        const amountPaid = paymentInfo.transaction_amount;
-        const status = paymentInfo.status;
-        const userId = paymentInfo.metadata?.user_id;
-
-        dbClient = await pool.connect();
-
-        await dbClient.query(
-          `
-          INSERT INTO payments (user_id, amount, currency, status, provider, provider_payment_id)
-          VALUES ($1, $2, $3, $4, $5, $6)
-          ON CONFLICT (provider_payment_id)
-          DO UPDATE SET status = EXCLUDED.status, updated_at = NOW();
-          `,
-          [
-            userId,
-            amountPaid,
-            paymentInfo.currency_id,
-            status,
-            "mercadopago",
-            paymentInfo.id,
-          ]
+      if (status === "approved" && userId) {
+        const check = await dbClient.query(
+          "SELECT 1 FROM transactions WHERE provider_payment_id = $1",
+          [paymentInfo.id]
         );
 
-        if (status === "approved" && userId) {
-          const checkBalanceUpdate = await dbClient.query(
-            "SELECT 1 FROM transactions WHERE provider_payment_id = $1",
-            [paymentInfo.id]
+        if (check.rowCount === 0) {
+          await dbClient.query("BEGIN");
+          await dbClient.query(
+            "UPDATE users SET balance = balance + $1 WHERE id = $2",
+            [amount, userId]
           );
-
-          if (checkBalanceUpdate.rowCount === 0) {
-            await dbClient.query("BEGIN");
-
-            await dbClient.query(
-              "UPDATE users SET balance = balance + $1 WHERE id = $2;",
-              [amountPaid, userId]
-            );
-
-            await dbClient.query(
-              `
-              INSERT INTO transactions (user_id, amount, transaction_type, provider_payment_id)
-              VALUES ($1, $2, $3, $4);
-              `,
-              [userId, amountPaid, "credit", paymentInfo.id]
-            );
-
-            await dbClient.query("COMMIT");
-            console.log(
-              `Balanço do usuário ${userId} atualizado com ${amountPaid}.`
-            );
-          }
+          await dbClient.query(
+            `INSERT INTO transactions (user_id, amount, transaction_type, provider_payment_id)
+             VALUES ($1,$2,$3,$4)`,
+            [userId, amount, "credit", paymentInfo.id]
+          );
+          await dbClient.query("COMMIT");
         }
       }
-    } catch (error) {
-      if (dbClient) await dbClient.query("ROLLBACK");
-      console.error("Erro ao processar o webhook:", error);
+    } catch (err) {
+      await dbClient.query("ROLLBACK");
+      console.error("Erro processando webhook:", err);
     } finally {
-      if (dbClient) dbClient.release();
+      dbClient.release();
     }
+
+    res.status(200).send("OK");
+  } catch (err) {
+    console.error("Erro no webhook:", err);
+    res.status(500).send("Erro interno");
   }
-  res.status(200).send("OK");
 });
 
 app.get("/api/payments/status/:id", async (req, res) => {
@@ -262,61 +267,47 @@ app.get("/api/payments/status/:id", async (req, res) => {
     const paymentClient = new Payment(client);
     const paymentInfo = await paymentClient.get({ id: paymentId });
 
-    if (!paymentInfo) {
-      return res
-        .status(404)
-        .json({ error: "Pagamento não encontrado no provedor." });
-    }
-
     const dbClient = await pool.connect();
+    let dbPayment = null;
 
-    const result = await dbClient.query(
-      "SELECT * FROM payments WHERE provider_payment_id = $1",
-      [paymentId]
-    );
-
-    let dbPayment = result.rows[0];
-
-    if (!dbPayment) {
-      const insert = await dbClient.query(
-        `
-        INSERT INTO payments (user_id, amount, currency, status, provider, provider_payment_id)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING *;
-      `,
-        [
-          paymentInfo.metadata?.user_id || null,
-          paymentInfo.transaction_amount,
-          paymentInfo.currency_id,
-          paymentInfo.status,
-          "mercadopago",
-          paymentInfo.id,
-        ]
+    try {
+      const result = await dbClient.query(
+        "SELECT * FROM payments WHERE provider_payment_id = $1",
+        [paymentId]
       );
-      dbPayment = insert.rows[0];
-    } else {
-      if (dbPayment.status !== paymentInfo.status) {
+      dbPayment = result.rows[0];
+
+      if (!dbPayment) {
+        const insert = await dbClient.query(
+          `INSERT INTO payments (user_id, amount, currency, status, provider, provider_payment_id)
+           VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+          [
+            paymentInfo.metadata?.user_id || null,
+            paymentInfo.transaction_amount,
+            paymentInfo.currency_id,
+            paymentInfo.status,
+            "mercadopago",
+            paymentInfo.id,
+          ]
+        );
+        dbPayment = insert.rows[0];
+      } else if (dbPayment.status !== paymentInfo.status) {
         const update = await dbClient.query(
-          `
-          UPDATE payments
-          SET status = $1, updated_at = NOW()
-          WHERE provider_payment_id = $2
-          RETURNING *;
-        `,
+          `UPDATE payments SET status=$1, updated_at=NOW() WHERE provider_payment_id=$2 RETURNING *`,
           [paymentInfo.status, paymentInfo.id]
         );
         dbPayment = update.rows[0];
       }
+    } finally {
+      dbClient.release();
     }
-
-    dbClient.release();
 
     res.status(200).json({
       provider: paymentInfo,
       database: dbPayment,
     });
-  } catch (error) {
-    console.error("Erro ao buscar status do pagamento:", error);
+  } catch (err) {
+    console.error("Erro ao buscar status:", err);
     res.status(500).json({ error: "Erro ao buscar status do pagamento" });
   }
 });
