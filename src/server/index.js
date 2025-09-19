@@ -320,7 +320,7 @@ app.get("/api/products/search", async (req, res) => {
   let paramIndex = 1;
 
   if (q) {
-    query += `AND (titulo ILIKE $${paramIndex} OR descricao ILIKE $${paramIndex} OR tags::text ILIKE $${paramIndex})`;
+    query += ` AND (titulo ILIKE $${paramIndex} OR descricao ILIKE $${paramIndex} OR categoria ILIKE $${paramIndex} OR tags::text ILIKE $${paramIndex})`;
     params.push(`%${q}%`);
     paramIndex++;
   }
@@ -328,6 +328,7 @@ app.get("/api/products/search", async (req, res) => {
   if (categoria) {
     query += `AND categoria = $${paramIndex}`;
     params.push(categoria);
+    paramIndex++;
   }
 
   try {
