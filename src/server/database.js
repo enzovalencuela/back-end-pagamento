@@ -59,11 +59,68 @@ export const createTables = async () => {
     `);
     console.log("Tabela 'cart_items' verificada ou criada com sucesso!");
 
+    // Tabela 'payments'
+    await client.query(`
+  CREATE TABLE IF NOT EXISTS payments (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    amount DECIMAL(10, 2) NOT NULL,
+    currency VARCHAR(10) NOT NULL DEFAULT 'BRL',
+    status VARCHAR(50) NOT NULL, -- ex.: 'pending', 'paid', 'failed'
+    provider VARCHAR(50), -- ex.: 'stripe'
+    provider_payment_id VARCHAR(255) UNIQUE, -- id do pagamento no provedor
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+  );
+`);
+    console.log("Tabela 'payments' verificada ou criada com sucesso!");
+
+    // Tabela 'transactions' para gerenciar o histórico de balanço do usuário
+    await client.query(`
+  CREATE TABLE IF NOT EXISTS transactions (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    amount DECIMAL(10, 2) NOT NULL,
+    transaction_type VARCHAR(50) NOT NULL, -- 'credit' (adição) ou 'debit' (compra)
+    provider VARCHAR(50) NOT NULL DEFAULT 'mercadopago',
+    provider_payment_id VARCHAR(255) UNIQUE, -- Para evitar duplicidade de webhooks
+    created_at TIMESTAMP DEFAULT NOW()
+  );
+`);
+    console.log("Tabela 'transactions' verificada ou criada com sucesso!");
+
+    // Adicionar depois da tabela 'transactions'
+
+    // Tabela 'orders' para rastrear pedidos
+    await client.query(`
+  CREATE TABLE IF NOT EXISTS orders (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    total_amount DECIMAL(10, 2) NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'pending', -- 'pending', 'paid', 'shipped' etc.
+    created_at TIMESTAMP DEFAULT NOW()
+  );
+`);
+    console.log("Tabela 'orders' verificada ou criada com sucesso!");
+
+    // Tabela 'order_items' para rastrear os produtos de cada pedido
+    await client.query(`
+  CREATE TABLE IF NOT EXISTS order_items (
+    id SERIAL PRIMARY KEY,
+    order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
+    product_id INTEGER REFERENCES products(id),
+    quantity INTEGER NOT NULL,
+    unit_price DECIMAL(10, 2) NOT NULL
+  );
+`);
+    console.log("Tabela 'order_items' verificada ou criada com sucesso!");
+
     client.release();
   } catch (err) {
     console.error("Erro ao criar as tabelas:", err);
   }
 };
+
 export const createUser = async (name, email, password) => {
   const client = await pool.connect();
   try {
