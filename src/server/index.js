@@ -147,26 +147,34 @@ app.get("/api/user/payments", async (req, res) => {
 });
 
 // --- Rotas de Pagamento do Mercado Pago ---
+// Exemplo de código no back-end
+
 app.post("/api/payments/create", async (req, res) => {
-  const { items, user_id, email, payment_method, card_token } = req.body;
+  const { product_ids, user_id, email, payment_method, card_token } = req.body;
 
-  if (!items || items.length === 0) {
-    return res
-      .status(400)
-      .json({ error: "Dados dos itens incompletos ou inválidos." });
-  }
-
-  const totalAmount = items.reduce((sum, i) => sum + i.unit_price, 0);
-
-  if (totalAmount <= 0) {
-    return res
-      .status(400)
-      .json({ error: "O valor total do pagamento deve ser maior que zero." });
+  // Verificação inicial
+  if (!product_ids || product_ids.length === 0) {
+    return res.status(400).json({ error: "IDs dos produtos ausentes." });
   }
 
   try {
-    const paymentClient = new Payment(client);
+    const products = await db.query(
+      "SELECT preco FROM products WHERE id IN (?)",
+      [product_ids]
+    );
 
+    const totalAmount = products.reduce(
+      (sum, product) => sum + parseFloat(product.preco),
+      0
+    );
+
+    if (totalAmount <= 0) {
+      return res
+        .status(400)
+        .json({ error: "O valor total do pagamento deve ser maior que zero." });
+    }
+
+    const paymentClient = new Payment(client);
     const paymentPayload = {
       transaction_amount: totalAmount,
       description: "Compra no E-Commerce",
@@ -191,10 +199,7 @@ app.post("/api/payments/create", async (req, res) => {
     }
 
     const paymentResponse = await paymentClient.create(paymentPayload);
-
-    res.status(200).json({
-      payment: paymentResponse,
-    });
+    res.status(200).json({ payment: paymentResponse });
   } catch (err) {
     console.error("Erro ao criar pagamento:", err);
     res.status(500).json({ error: "Erro ao criar pagamento" });
