@@ -14,6 +14,7 @@ import {
   getCartByUserId,
   getAllProducts,
   getProductById,
+  getBalance,
   createTables,
   addProducts,
   createProduct,
@@ -92,7 +93,7 @@ app.post("/api/user/change-password", async (req, res) => {
     return res.status(400).json({ message: "Dados incompletos." });
   }
   try {
-    const user = await getBalance(userId); // Usa getBalance para buscar o usuário pelo ID
+    const user = await getBalance(userId);
     if (!user) {
       return res.status(404).json({ message: "Usuário não encontrado." });
     }
@@ -147,19 +148,19 @@ app.get("/api/user/payments", async (req, res) => {
 });
 
 // --- Rotas de Pagamento do Mercado Pago ---
-// Exemplo de código no back-end
 
 app.post("/api/payments/create", async (req, res) => {
   const { product_ids, user_id, email, payment_method, card_token } = req.body;
 
-  // Verificação inicial
   if (!product_ids || product_ids.length === 0) {
     return res.status(400).json({ error: "IDs dos produtos ausentes." });
   }
 
+  const dbClient = await pool.connect();
+
   try {
-    const products = await db.query(
-      "SELECT preco FROM products WHERE id IN (?)",
+    const { rows: products } = await dbClient.query(
+      "SELECT preco FROM products WHERE id = ANY($1::int[])",
       [product_ids]
     );
 
@@ -203,9 +204,10 @@ app.post("/api/payments/create", async (req, res) => {
   } catch (err) {
     console.error("Erro ao criar pagamento:", err);
     res.status(500).json({ error: "Erro ao criar pagamento" });
+  } finally {
+    dbClient.release();
   }
 });
-
 app.post("/api/payments/webhook", async (req, res) => {
   console.log("Webhook recebido:", req.body);
 
