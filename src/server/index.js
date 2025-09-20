@@ -287,7 +287,7 @@ app.post("/api/payments/webhook", async (req, res) => {
   }
 });
 
-app.get("/api/payments/status/:id", async (req, res) => {
+app.get("/api/payments/:id/status", async (req, res) => {
   const paymentId = req.params.id;
 
   try {
