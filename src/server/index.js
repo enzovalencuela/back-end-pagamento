@@ -162,12 +162,12 @@ app.post("/api/payments/create", async (req, res) => {
   const dbClient = await pool.connect();
   try {
     const { rows: products } = await dbClient.query(
-      "SELECT preco FROM products WHERE id = ANY($1::int[])",
+      "SELECT preco::numeric FROM products WHERE id = ANY($1::int[])",
       [product_ids]
     );
 
     const totalAmount = products.reduce(
-      (sum, product) => sum + parseFloat(product.preco),
+      (sum, product) => sum + product.preco,
       0
     );
 
@@ -214,6 +214,7 @@ app.post("/api/payments/create", async (req, res) => {
     dbClient.release();
   }
 });
+
 app.post("/api/payments/webhook", async (req, res) => {
   console.log("Webhook recebido:", req.body);
 
