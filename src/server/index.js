@@ -166,6 +166,12 @@ app.post("/api/payments/create", async (req, res) => {
       [product_ids]
     );
 
+    if (products.length === 0) {
+      return res.status(400).json({
+        error: "Nenhum produto encontrado com os IDs fornecidos.",
+      });
+    }
+
     const totalAmount = products.reduce(
       (sum, product) => sum + Number(product.preco),
       0
