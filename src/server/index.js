@@ -192,7 +192,7 @@ app.post("/api/payments/create", async (req, res) => {
         email,
         identification: {
           type: "CPF",
-          number: cpf.replace(/[^\d]/g, ""),
+          number: cpf,
         },
       },
       metadata: {
