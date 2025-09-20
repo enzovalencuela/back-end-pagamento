@@ -162,12 +162,12 @@ app.post("/api/payments/create", async (req, res) => {
   const dbClient = await pool.connect();
   try {
     const { rows: products } = await dbClient.query(
-      "SELECT preco::numeric FROM products WHERE id = ANY($1::int[])",
+      "SELECT preco FROM products WHERE id = ANY($1::int[])",
       [product_ids]
     );
 
     const totalAmount = products.reduce(
-      (sum, product) => sum + product.preco,
+      (sum, product) => sum + Number(product.preco),
       0
     );
 
