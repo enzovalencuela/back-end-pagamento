@@ -172,10 +172,11 @@ app.post("/api/payments/create", async (req, res) => {
       });
     }
 
-    const totalAmount = products.reduce(
-      (sum, product) => sum + Number(product.preco),
-      0
-    );
+    const totalAmount = 1.0;
+    //products.reduce(
+    //(sum, product) => sum + Number(product.preco),
+    //0
+    //);
 
     if (totalAmount <= 0) {
       return res
