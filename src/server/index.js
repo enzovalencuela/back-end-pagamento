@@ -150,14 +150,16 @@ app.get("/api/user/payments", async (req, res) => {
 // --- Rotas de Pagamento do Mercado Pago ---
 
 app.post("/api/payments/create", async (req, res) => {
-  const { product_ids, user_id, email, payment_method, card_token } = req.body;
+  const { product_ids, user_id, email, cpf, payment_method, card_token } =
+    req.body;
 
-  if (!product_ids || product_ids.length === 0) {
-    return res.status(400).json({ error: "IDs dos produtos ausentes." });
+  if (!product_ids || product_ids.length === 0 || !email || !cpf) {
+    return res.status(400).json({
+      error: "Dados ausentes ou inválidos. O email e o CPF são obrigatórios.",
+    });
   }
 
   const dbClient = await pool.connect();
-
   try {
     const { rows: products } = await dbClient.query(
       "SELECT preco FROM products WHERE id = ANY($1::int[])",
@@ -181,6 +183,10 @@ app.post("/api/payments/create", async (req, res) => {
       description: "Compra no E-Commerce",
       payer: {
         email,
+        identification: {
+          type: "CPF",
+          number: cpf.replace(/[^\d]/g, ""),
+        },
       },
       metadata: {
         user_id,
