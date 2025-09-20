@@ -30,6 +30,7 @@ const PORT = process.env.PORT || 3001;
 const client = new MercadoPagoConfig({
   accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN,
 });
+const payment = new Payment(client);
 
 app.use(express.json());
 app.use(cors());
@@ -148,6 +149,7 @@ app.get("/api/user/payments", async (req, res) => {
 });
 
 // --- Rotas de Pagamento do Mercado Pago ---
+
 app.post("/api/payments/create", async (req, res) => {
   const { product_ids, user_id, email, cpf, payment_method, card_token } =
     req.body;
@@ -196,11 +198,11 @@ app.post("/api/payments/create", async (req, res) => {
       metadata: {
         user_id,
       },
-    }; // PIX
+    };
 
     if (payment_method === "pix") {
       paymentPayload.payment_method_id = "pix";
-    } // Cartão
+    }
 
     if (payment_method === "card" && card_token) {
       paymentPayload.token = card_token;
@@ -294,14 +296,30 @@ app.get("/api/payments/:id/status", async (req, res) => {
     const paymentClient = new Payment(client);
     const paymentInfo = await paymentClient.get({ id: paymentId });
 
-    res.status(200).json({
-      payment: {
-        status: paymentInfo.status,
-        status_detail: paymentInfo.status_detail,
-        total_amount: paymentInfo.transaction_amount,
-        point_of_interaction: paymentInfo.point_of_interaction,
-      },
-    });
+    const responseData = {
+      id: paymentInfo.id,
+      status: paymentInfo.status,
+      status_detail: paymentInfo.status_detail,
+      total_amount: paymentInfo.transaction_amount,
+      payment_type: paymentInfo.payment_type_id,
+      payment_method: paymentInfo.payment_method_id,
+      date_approved: paymentInfo.date_approved,
+    };
+
+    if (
+      paymentInfo.payment_type_id === "pix" &&
+      paymentInfo.point_of_interaction
+    ) {
+      responseData.pix = {
+        qr_code: paymentInfo.point_of_interaction.transaction_data?.qr_code,
+        qr_code_base64:
+          paymentInfo.point_of_interaction.transaction_data?.qr_code_base64,
+        ticket_url:
+          paymentInfo.point_of_interaction.transaction_data?.ticket_url,
+      };
+    }
+
+    res.status(200).json({ payment: responseData });
   } catch (err) {
     console.error("Erro ao buscar status:", err);
     res.status(500).json({ error: "Erro ao buscar status do pagamento" });
