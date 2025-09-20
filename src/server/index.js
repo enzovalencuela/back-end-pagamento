@@ -294,44 +294,13 @@ app.get("/api/payments/:id/status", async (req, res) => {
     const paymentClient = new Payment(client);
     const paymentInfo = await paymentClient.get({ id: paymentId });
 
-    const dbClient = await pool.connect();
-    let dbPayment = null;
-
-    try {
-      const result = await dbClient.query(
-        "SELECT * FROM payments WHERE provider_payment_id = $1",
-        [paymentId]
-      );
-      dbPayment = result.rows[0];
-
-      if (!dbPayment) {
-        const insert = await dbClient.query(
-          `INSERT INTO payments (user_id, amount, currency, status, provider, provider_payment_id)
-           VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
-          [
-            paymentInfo.metadata?.user_id || null,
-            paymentInfo.transaction_amount,
-            paymentInfo.currency_id,
-            paymentInfo.status,
-            "mercadopago",
-            paymentInfo.id,
-          ]
-        );
-        dbPayment = insert.rows[0];
-      } else if (dbPayment.status !== paymentInfo.status) {
-        const update = await dbClient.query(
-          `UPDATE payments SET status=$1, updated_at=NOW() WHERE provider_payment_id=$2 RETURNING *`,
-          [paymentInfo.status, paymentInfo.id]
-        );
-        dbPayment = update.rows[0];
-      }
-    } finally {
-      dbClient.release();
-    }
-
     res.status(200).json({
-      provider: paymentInfo,
-      database: dbPayment,
+      payment: {
+        status: paymentInfo.status,
+        status_detail: paymentInfo.status_detail,
+        total_amount: paymentInfo.transaction_amount,
+        point_of_interaction: paymentInfo.point_of_interaction,
+      },
     });
   } catch (err) {
     console.error("Erro ao buscar status:", err);
