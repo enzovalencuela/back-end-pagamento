@@ -148,7 +148,6 @@ app.get("/api/user/payments", async (req, res) => {
 });
 
 // --- Rotas de Pagamento do Mercado Pago ---
-
 app.post("/api/payments/create", async (req, res) => {
   const { product_ids, user_id, email, cpf, payment_method, card_token } =
     req.body;
@@ -172,11 +171,10 @@ app.post("/api/payments/create", async (req, res) => {
       });
     }
 
-    const totalAmount = 1.0;
-    //products.reduce(
-    //(sum, product) => sum + Number(product.preco),
-    //0
-    //);
+    const totalAmount = products.reduce(
+      (sum, product) => sum + Number(product.preco),
+      0
+    );
 
     if (totalAmount <= 0) {
       return res
@@ -198,21 +196,22 @@ app.post("/api/payments/create", async (req, res) => {
       metadata: {
         user_id,
       },
-    };
+    }; // PIX
 
-    // PIX
     if (payment_method === "pix") {
       paymentPayload.payment_method_id = "pix";
-    }
+    } // Cartão
 
-    // Cartão
     if (payment_method === "card" && card_token) {
       paymentPayload.token = card_token;
       paymentPayload.payment_method_id = req.body.card_brand;
       paymentPayload.installments = 1;
     }
 
-    const paymentResponse = await paymentClient.create(paymentPayload);
+    const paymentResponse = await paymentClient.create({
+      body: paymentPayload,
+    });
+
     res.status(200).json({ payment: paymentResponse });
   } catch (err) {
     console.error("Erro ao criar pagamento:", err);
