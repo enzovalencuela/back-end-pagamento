@@ -158,6 +158,7 @@ app.post("/api/payments/create", async (req, res) => {
     payment_method_id,
     token,
     transaction_amount,
+    installments,
     payer,
   } = req.body;
 
@@ -216,14 +217,16 @@ app.post("/api/payments/create", async (req, res) => {
       additional_info: {
         items: items,
       },
-      payment_method_id: payment_method_id,
       external_reference: external_reference,
       statement_descriptor: "E-Commerce Gamer",
     };
 
-    if (token) {
+    if (payment_method_id === "pix") {
+      paymentPayload.payment_method_id = "pix";
+    } else if (token) {
       paymentPayload.token = token;
-      paymentPayload.installments = 1;
+      paymentPayload.payment_method_id = payment_method_id;
+      paymentPayload.installments = installments || 1;
     }
 
     if (cpf) {
