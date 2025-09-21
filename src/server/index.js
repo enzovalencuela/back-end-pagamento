@@ -210,7 +210,9 @@ app.post("/api/payments/create", async (req, res) => {
       description: "Compra no E-Commerce",
       payer: { email },
       metadata: { user_id },
-      items: items,
+      additional_info: {
+        items: items,
+      },
       payment_method_id: payment_method_id,
     };
 
