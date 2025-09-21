@@ -155,7 +155,7 @@ app.post("/api/payments/create", async (req, res) => {
     req.body;
   console.log("Body recebido:", req.body);
 
-  if (!product_ids || product_ids.length === 0 || (!email && !cpf)) {
+  if (!product_ids || product_ids.length === 0 || !email) {
     return res.status(400).json({
       error: "Dados ausentes ou inválidos. O email e o CPF são obrigatórios.",
     });
@@ -179,10 +179,12 @@ app.post("/api/payments/create", async (req, res) => {
       0
     );
 
-    if (totalAmount <= 0) {
+    if (totalAmount <= 1) {
       return res
         .status(400)
-        .json({ error: "O valor total do pagamento deve ser maior que zero." });
+        .json({
+          error: "O valor total do pagamento deve ser maior que R$ 1,00.",
+        });
     }
 
     const paymentClient = new Payment(client);
@@ -203,7 +205,7 @@ app.post("/api/payments/create", async (req, res) => {
 
     if (payment_method_id !== "pix" && token) {
       paymentPayload.token = token;
-      paymentPayload.payment_method_id = req.body.card_brand;
+      paymentPayload.payment_method_id = payment_method_id;
       paymentPayload.installments = 1;
       paymentPayload.payer.identification = {
         type: "CPF",
