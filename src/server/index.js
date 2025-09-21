@@ -218,6 +218,7 @@ app.post("/api/payments/create", async (req, res) => {
       },
       payment_method_id: payment_method_id,
       external_reference: external_reference,
+      statement_descriptor: "E-Commerce Gamer",
     };
 
     if (token) {
