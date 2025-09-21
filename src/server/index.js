@@ -1,6 +1,7 @@
 // src/server/index.js
 
 import express from "express";
+import { v4 as uuidv4 } from "uuid";
 import dotenv from "dotenv";
 import cors from "cors";
 import pool from "./database.js";
@@ -160,6 +161,8 @@ app.post("/api/payments/create", async (req, res) => {
     payer,
   } = req.body;
 
+  const external_reference = uuidv4();
+
   const email = payer?.email;
   const cpf = payer?.identification?.number;
 
@@ -214,6 +217,7 @@ app.post("/api/payments/create", async (req, res) => {
         items: items,
       },
       payment_method_id: payment_method_id,
+      external_reference: external_reference,
     };
 
     if (token) {
