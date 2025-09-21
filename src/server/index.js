@@ -151,10 +151,11 @@ app.get("/api/user/payments", async (req, res) => {
 // --- Rotas de Pagamento do Mercado Pago ---
 
 app.post("/api/payments/create", async (req, res) => {
-  const { product_ids, user_id, email, cpf, payment_method, card_token } =
+  const { product_ids, user_id, email, cpf, payment_method_id, token } =
     req.body;
+  console.log("Body recebido:", req.body);
 
-  if (!product_ids || product_ids.length === 0 || !email || !cpf) {
+  if (!product_ids || product_ids.length === 0 || (!email && !cpf)) {
     return res.status(400).json({
       error: "Dados ausentes ou inválidos. O email e o CPF são obrigatórios.",
     });
@@ -190,24 +191,24 @@ app.post("/api/payments/create", async (req, res) => {
       description: "Compra no E-Commerce",
       payer: {
         email,
-        identification: {
-          type: "CPF",
-          number: cpf,
-        },
       },
       metadata: {
         user_id,
       },
     };
 
-    if (payment_method === "pix") {
+    if (payment_method_id === "pix") {
       paymentPayload.payment_method_id = "pix";
     }
 
-    if (payment_method === "card" && card_token) {
-      paymentPayload.token = card_token;
+    if (payment_method_id !== "pix" && token) {
+      paymentPayload.token = token;
       paymentPayload.payment_method_id = req.body.card_brand;
       paymentPayload.installments = 1;
+      paymentPayload.payer.identification = {
+        type: "CPF",
+        number: cpf,
+      };
     }
 
     const paymentResponse = await paymentClient.create({
