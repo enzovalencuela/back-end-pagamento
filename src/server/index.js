@@ -174,7 +174,7 @@ app.post("/api/payments/create", async (req, res) => {
   const dbClient = await pool.connect();
   try {
     const { rows: products } = await dbClient.query(
-      "SELECT preco FROM products WHERE id = ANY($1::int[])",
+      "SELECT id, titulo, preco, categoria, descricao FROM products WHERE id = ANY($1::int[])",
       [product_ids]
     );
 
@@ -195,12 +195,22 @@ app.post("/api/payments/create", async (req, res) => {
       });
     }
 
+    const items = products.map((product) => ({
+      id: product.id,
+      title: product.titulo,
+      description: product.descricao,
+      category_id: product.categoria,
+      quantity: 1,
+      unit_price: product.preco,
+    }));
+
     const paymentClient = new Payment(client);
     const paymentPayload = {
       transaction_amount: transaction_amount || totalAmount,
       description: "Compra no E-Commerce",
       payer: { email },
       metadata: { user_id },
+      items: items,
       payment_method_id: payment_method_id,
     };
 
