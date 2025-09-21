@@ -151,13 +151,23 @@ app.get("/api/user/payments", async (req, res) => {
 // --- Rotas de Pagamento do Mercado Pago ---
 
 app.post("/api/payments/create", async (req, res) => {
-  const { product_ids, user_id, email, cpf, payment_method_id, token } =
-    req.body;
+  const {
+    product_ids,
+    user_id,
+    payment_method_id,
+    token,
+    transaction_amount,
+    payer,
+  } = req.body;
+
+  const email = payer?.email;
+  const cpf = payer?.identification?.number;
+
   console.log("Body recebido:", req.body);
 
   if (!product_ids || product_ids.length === 0 || !email) {
     return res.status(400).json({
-      error: "Dados ausentes ou inválidos. O email e o CPF são obrigatórios.",
+      error: "Dados ausentes ou inválidos. O email é obrigatório.",
     });
   }
 
@@ -179,24 +189,18 @@ app.post("/api/payments/create", async (req, res) => {
       0
     );
 
-    if (totalAmount <= 1) {
-      return res
-        .status(400)
-        .json({
-          error: "O valor total do pagamento deve ser maior que R$ 1,00.",
-        });
+    if (transaction_amount <= 1 || totalAmount <= 1) {
+      return res.status(400).json({
+        error: "O valor total do pagamento deve ser maior que R$ 1,00.",
+      });
     }
 
     const paymentClient = new Payment(client);
     const paymentPayload = {
-      transaction_amount: totalAmount,
+      transaction_amount: transaction_amount || totalAmount,
       description: "Compra no E-Commerce",
-      payer: {
-        email,
-      },
-      metadata: {
-        user_id,
-      },
+      payer: { email },
+      metadata: { user_id },
     };
 
     if (payment_method_id === "pix") {
@@ -207,10 +211,13 @@ app.post("/api/payments/create", async (req, res) => {
       paymentPayload.token = token;
       paymentPayload.payment_method_id = payment_method_id;
       paymentPayload.installments = 1;
-      paymentPayload.payer.identification = {
-        type: "CPF",
-        number: cpf,
-      };
+
+      if (cpf) {
+        paymentPayload.payer.identification = {
+          type: "CPF",
+          number: cpf,
+        };
+      }
     }
 
     const paymentResponse = await paymentClient.create({
