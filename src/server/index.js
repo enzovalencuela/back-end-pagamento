@@ -207,17 +207,17 @@ app.post("/api/payments/create", async (req, res) => {
       paymentPayload.payment_method_id = "pix";
     }
 
-    if (payment_method_id !== "pix" && token) {
+    if (token) {
       paymentPayload.token = token;
       paymentPayload.payment_method_id = payment_method_id;
       paymentPayload.installments = 1;
+    }
 
-      if (cpf) {
-        paymentPayload.payer.identification = {
-          type: "CPF",
-          number: cpf,
-        };
-      }
+    if (cpf) {
+      paymentPayload.payer.identification = {
+        type: "CPF",
+        number: cpf,
+      };
     }
 
     const paymentResponse = await paymentClient.create({
