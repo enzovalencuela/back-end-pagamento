@@ -197,22 +197,16 @@ app.post("/api/payments/create", async (req, res) => {
 
     const paymentClient = new Payment(client);
     const paymentPayload = {
-      transaction_amount: transaction_amount || totalAmount,
+      transaction_amount: transaction_amount,
       description: "Compra no E-Commerce",
       payer: { email },
       metadata: { user_id },
+      payment_method_id: payment_method_id,
     };
-
-    if (payment_method_id === "pix") {
-      paymentPayload.payment_method_id = "pix";
-    }
-
     if (token) {
       paymentPayload.token = token;
-      paymentPayload.payment_method_id = payment_method_id;
-      paymentPayload.installments = 1;
+      paymentPayload.installments = installments;
     }
-
     if (cpf) {
       paymentPayload.payer.identification = {
         type: "CPF",
