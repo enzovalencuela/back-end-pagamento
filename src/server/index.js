@@ -31,7 +31,6 @@ const PORT = process.env.PORT || 3001;
 const client = new MercadoPagoConfig({
   accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN,
 });
-const payment = new Payment(client);
 
 app.use(express.json());
 app.use(cors());
@@ -149,6 +148,29 @@ app.get("/api/user/payments", async (req, res) => {
   }
 });
 
+app.put("/api/users/:id/update-checkout-info", async (req, res) => {
+  const { id } = req.params;
+  const { name, cpf, phone, address, number, neighborhood, city, state, zip } =
+    req.body;
+
+  try {
+    await pool.query(
+      `UPDATE users 
+       SET name = $1, cpf = $2, phone = $3, address = $4, number = $5,
+           neighborhood = $6, city = $7, state = $8, zip = $9
+       WHERE id = $10`,
+      [name, cpf, phone, address, number, neighborhood, city, state, zip, id]
+    );
+
+    res
+      .status(200)
+      .json({ message: "Dados de checkout atualizados com sucesso" });
+  } catch (err) {
+    console.error("Erro ao atualizar dados do usuário:", err);
+    res.status(500).json({ error: "Erro ao atualizar dados do usuário" });
+  }
+});
+
 // --- Rotas de Pagamento do Mercado Pago ---
 
 app.post("/api/payments/create", async (req, res) => {
@@ -177,6 +199,19 @@ app.post("/api/payments/create", async (req, res) => {
 
   const dbClient = await pool.connect();
   try {
+    const { rows: users } = await dbClient.query(
+      `SELECT id, name, email, cpf, phone, address, number, neighborhood, city, state, zip
+   FROM users
+   WHERE id = $1`,
+      [user_id]
+    );
+
+    if (users.length === 0) {
+      return res.status(400).json({ error: "Usuário não encontrado." });
+    }
+
+    const user = users[0];
+
     const { rows: products } = await dbClient.query(
       "SELECT id, titulo, preco, categoria, descricao FROM products WHERE id = ANY($1::int[])",
       [product_ids]
@@ -209,23 +244,40 @@ app.post("/api/payments/create", async (req, res) => {
     }));
 
     const paymentClient = new Payment(client);
+
     const paymentPayload = {
-      transaction_amount: transaction_amount || totalAmount,
+      transaction_amount: totalAmount,
+      payment_method_id: payment_method_id,
       description: "Compra no E-Commerce",
-      payer: { email },
-      metadata: { user_id },
+      payer: {
+        email: user.email,
+        first_name: user.name,
+        phone: {
+          area_code: user.phone?.slice(0, 2),
+          number: user.phone?.slice(2),
+        },
+        address: {
+          street_name: user.address,
+          street_number: user.number,
+          neighborhood: user.neighborhood,
+          city: user.city,
+          federal_unit: user.state,
+          zip_code: user.zip,
+        },
+      },
+      metadata: { user_id: user.id },
       additional_info: {
-        items: items,
+        items,
+        payer: {
+          first_name: user.nome,
+        },
       },
       external_reference: external_reference,
       statement_descriptor: "E-Commerce Gamer",
     };
 
-    if (payment_method_id === "pix") {
-      paymentPayload.payment_method_id = "pix";
-    } else if (token) {
+    if (token) {
       paymentPayload.token = token;
-      paymentPayload.payment_method_id = payment_method_id;
       paymentPayload.installments = installments || 1;
     }
 
