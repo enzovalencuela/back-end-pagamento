@@ -183,6 +183,7 @@ app.post("/api/payments/create", async (req, res) => {
   const external_reference = uuidv4();
 
   const email = payer?.email;
+  const name = payer?.first_name;
   const cpf = payer?.identification?.number;
 
   console.log("Body recebido:", req.body);
@@ -246,8 +247,8 @@ app.post("/api/payments/create", async (req, res) => {
       payment_method_id: payment_method_id,
       description: "Compra no E-Commerce",
       payer: {
-        email: user.email,
-        first_name: user.name,
+        email: email || user.email,
+        first_name: name || user.name,
         phone: {
           area_code: user.phone?.slice(0, 2),
           number: user.phone?.slice(2),
@@ -265,7 +266,7 @@ app.post("/api/payments/create", async (req, res) => {
       additional_info: {
         items,
         payer: {
-          first_name: user.nome,
+          first_name: user.name,
         },
       },
       external_reference: external_reference,
