@@ -247,11 +247,15 @@ app.post("/api/payments/create", async (req, res) => {
       payment_method_id: payment_method_id,
       description: "Compra no E-Commerce",
       payer: {
-        email: email || user.email,
-        first_name: name || user.name,
+        email: user.email,
+        first_name: user.name,
+        identification: {
+          type: "CPF",
+          number: user.cpf,
+        },
         phone: {
-          area_code: user.phone?.slice(0, 2),
-          number: user.phone?.slice(2),
+          area_code: user.phone?.slice(0, 2) || "",
+          number: user.phone?.slice(2) || "",
         },
         address: {
           street_name: user.address,
@@ -267,9 +271,10 @@ app.post("/api/payments/create", async (req, res) => {
         items,
         payer: {
           first_name: user.name,
+          registration_date: new Date().toISOString(),
         },
       },
-      external_reference: external_reference,
+      external_reference,
       statement_descriptor: "E-Commerce Gamer",
     };
 
