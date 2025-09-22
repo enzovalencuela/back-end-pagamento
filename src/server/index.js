@@ -155,10 +155,7 @@ app.put("/api/users/:id/update-checkout-info", async (req, res) => {
 
   try {
     await pool.query(
-      `UPDATE users 
-       SET name = $1, cpf = $2, phone = $3, address = $4, number = $5,
-           neighborhood = $6, city = $7, state = $8, zip = $9
-       WHERE id = $10`,
+      `UPDATE users SET name = $1, cpf = $2, phone = $3, address = $4, number = $5, neighborhood = $6, city = $7, state = $8, zip = $9 WHERE id = $10`,
       [name, cpf, phone, address, number, neighborhood, city, state, zip, id]
     );
 
