@@ -61,17 +61,20 @@ export const createTables = async () => {
 
     // Tabela 'payments'
     await client.query(`
-  CREATE TABLE IF NOT EXISTS payments (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    amount DECIMAL(10, 2) NOT NULL,
-    currency VARCHAR(10) NOT NULL DEFAULT 'BRL',
-    status VARCHAR(50) NOT NULL, -- ex.: 'pending', 'paid', 'failed'
-    provider VARCHAR(50), -- ex.: 'stripe'
-    provider_payment_id VARCHAR(255) UNIQUE, -- id do pagamento no provedor
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
-  );
+CREATE TABLE IF NOT EXISTS payments (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  amount DECIMAL(10, 2) NOT NULL,
+  currency VARCHAR(10) NOT NULL DEFAULT 'BRL',
+  status VARCHAR(50) NOT NULL, -- 'pending', 'approved', 'rejected' etc.
+  provider VARCHAR(50), -- 'mercadopago', 'stripe'...
+  provider_payment_id VARCHAR(255) UNIQUE, -- id no provedor
+  installments INT, -- número de parcelas
+  additional_info JSONB, -- dados adicionais estruturados
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
 `);
     console.log("Tabela 'payments' verificada ou criada com sucesso!");
 

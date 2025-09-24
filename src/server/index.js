@@ -323,12 +323,14 @@ app.post("/api/payments/webhook", async (req, res) => {
     const userId = paymentInfo.metadata?.user_id;
     const amount = paymentInfo.transaction_amount;
     const status = paymentInfo.status;
+    const additional_info = paymentInfo.additional_info;
+    const installments = paymentInfo.installments;
 
     const dbClient = await pool.connect();
     try {
       await dbClient.query(
-        `INSERT INTO payments (user_id, amount, currency, status, provider, provider_payment_id)
-         VALUES ($1,$2,$3,$4,$5,$6)
+        `INSERT INTO payments (user_id, amount, currency, status, provider, provider_payment_id, additional_info, installments)
+         VALUES ($1,$2,$3,$4,$5,$6, $7, $8)
          ON CONFLICT (provider_payment_id)
          DO UPDATE SET status = EXCLUDED.status, updated_at = NOW()`,
         [
@@ -338,36 +340,16 @@ app.post("/api/payments/webhook", async (req, res) => {
           status,
           "mercadopago",
           paymentInfo.id,
+          additional_info,
+          installments,
         ]
       );
-
-      if (status === "approved" && userId) {
-        const check = await dbClient.query(
-          "SELECT 1 FROM transactions WHERE provider_payment_id = $1",
-          [paymentInfo.id]
-        );
-
-        if (check.rowCount === 0) {
-          await dbClient.query("BEGIN");
-          await dbClient.query(
-            "UPDATE users SET balance = balance + $1 WHERE id = $2",
-            [amount, userId]
-          );
-          await dbClient.query(
-            `INSERT INTO transactions (user_id, amount, transaction_type, provider_payment_id)
-             VALUES ($1,$2,$3,$4)`,
-            [userId, amount, "credit", paymentInfo.id]
-          );
-          await dbClient.query("COMMIT");
-        }
-      }
     } catch (err) {
       await dbClient.query("ROLLBACK");
       console.error("Erro processando webhook:", err);
     } finally {
       dbClient.release();
     }
-
     res.status(200).send("OK");
   } catch (err) {
     console.error("Erro no webhook:", err);
