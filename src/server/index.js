@@ -145,7 +145,7 @@ app.delete("/api/user/payments/:id", async (req, res) => {
   try {
     dbClient = await pool.connect();
 
-    const result = await dbClient.query("DELETE FROM payments WHERE id = ?", [
+    const result = await dbClient.query("DELETE FROM payments WHERE id = $1", [
       id,
     ]);
 
