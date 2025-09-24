@@ -126,8 +126,8 @@ app.get("/api/user/balance/:userId", async (req, res) => {
   }
 });
 
-app.get("/api/user/payments/:id", async (req, res) => {
-  const userId = req.query.userId;
+app.get("/api/user/payments", async (req, res) => {
+  const userId = req.query.id;
   if (!userId) {
     return res.status(400).json({ error: "ID do usuário não fornecido." });
   }
