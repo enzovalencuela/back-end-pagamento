@@ -135,7 +135,7 @@ app.get("/api/user/payments", async (req, res) => {
   }
 });
 
-app.delete("/api/payments/:id", async (req, res) => {
+app.delete("/api/user/payments/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
