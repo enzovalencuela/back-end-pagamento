@@ -17,7 +17,6 @@ import {
   getProductById,
   getBalance,
   createTables,
-  addProducts,
   createProduct,
   updateProduct,
   deleteProduct,

@@ -159,6 +159,25 @@ export const findUserByEmail = async (email) => {
   }
 };
 
+export const getBalance = async (userId) => {
+  const client = await pool.connect();
+  const res = await client.query("SELECT balance FROM users WHERE id = $1", [
+    userId,
+  ]);
+  client.release();
+  return res.rows[0] ? res.rows[0].balance : 0;
+};
+
+export const addBalance = async (userId, amount) => {
+  const client = await pool.connect();
+  const res = await client.query(
+    "UPDATE users SET balance = balance + $1 WHERE id = $2 RETURNING balance",
+    [amount, userId]
+  );
+  client.release();
+  return res.rows[0] ? res.rows[0].balance : null;
+};
+
 // --- Funções de Carrinho ---
 
 export const addToCart = async (userId, productId) => {
