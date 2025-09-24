@@ -113,19 +113,6 @@ app.post("/api/user/change-password", async (req, res) => {
   }
 });
 
-// --- Rota para Saldo do Usuário ---
-
-app.get("/api/user/balance/:userId", async (req, res) => {
-  const { userId } = req.params;
-  try {
-    const balance = await getBalance(userId);
-    res.status(200).json({ balance });
-  } catch (error) {
-    console.error("Erro ao buscar saldo:", error);
-    res.status(500).json({ error: "Erro interno do servidor." });
-  }
-});
-
 app.get("/api/user/payments", async (req, res) => {
   const userId = req.query.id;
   if (!userId) {
@@ -145,6 +132,19 @@ app.get("/api/user/payments", async (req, res) => {
     res.status(500).json({ error: "Erro ao buscar histórico de pagamentos." });
   } finally {
     if (dbClient) dbClient.release();
+  }
+});
+
+app.delete("/api/payments/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await db.query("DELETE FROM payments WHERE id = ?", [id]);
+
+    return res.status(200).json({ message: "Compra cancelada com sucesso" });
+  } catch (error) {
+    console.error("Erro ao deletar compra:", error);
+    return res.status(500).json({ message: "Erro ao cancelar compra" });
   }
 });
 
