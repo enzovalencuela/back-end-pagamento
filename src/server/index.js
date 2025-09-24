@@ -136,10 +136,18 @@ app.get("/api/user/payments", async (req, res) => {
 });
 
 app.delete("/api/user/payments/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({ error: "ID da compra não fornecido." });
+  }
 
-    await db.query("DELETE FROM payments WHERE id = ?", [id]);
+  let dbClient;
+  try {
+    dbClient = await pool.connect();
+
+    const result = await dbClient.query("DELETE FROM payments WHERE id = ?", [
+      id,
+    ]);
 
     return res.status(200).json({ message: "Compra cancelada com sucesso" });
   } catch (error) {
