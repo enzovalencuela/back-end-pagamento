@@ -126,7 +126,7 @@ app.get("/api/user/balance/:userId", async (req, res) => {
   }
 });
 
-app.get("/api/user/payments", async (req, res) => {
+app.get("/api/user/payments/:id", async (req, res) => {
   const userId = req.query.userId;
   if (!userId) {
     return res.status(400).json({ error: "ID do usuário não fornecido." });
@@ -183,7 +183,6 @@ app.post("/api/payments/create", async (req, res) => {
   const external_reference = uuidv4();
 
   const email = payer?.email;
-  const name = payer?.first_name;
   const cpf = payer?.identification?.number;
 
   console.log("Body recebido:", req.body);
