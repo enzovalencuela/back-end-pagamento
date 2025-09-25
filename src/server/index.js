@@ -372,6 +372,8 @@ app.get("/api/payments/:id/status", async (req, res) => {
       payment_type: paymentInfo.payment_type_id,
       payment_method: paymentInfo.payment_method_id,
       date_approved: paymentInfo.date_approved,
+      installments: paymentInfo.installments,
+      additional_info: paymentInfo.additional_info,
     };
 
     if (
