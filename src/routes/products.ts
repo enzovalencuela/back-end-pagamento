@@ -1,5 +1,5 @@
 // --- Rotas de Produtos ---
-import app from "../index.js";
+import { Router } from "express";
 import { pool } from "../index.js";
 import {
   createProduct,
@@ -9,7 +9,9 @@ import {
   deleteProduct,
 } from "../server/database.js";
 
-app.post("/api/products/add", async (req, res) => {
+const router = Router();
+
+router.post("/add", async (req, res) => {
   const {
     titulo,
     preco,
@@ -54,7 +56,7 @@ app.post("/api/products/add", async (req, res) => {
 });
 
 // Rota para obter todos os produtos
-app.get("/api/products", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const products = await getAllProducts();
     res.status(200).json(products);
@@ -64,7 +66,7 @@ app.get("/api/products", async (req, res) => {
   }
 });
 
-app.get("/api/products/search", async (req, res) => {
+router.get("/search", async (req, res) => {
   const { q, categoria } = req.query;
   const params = [];
   let paramIndex = 1;
@@ -103,7 +105,7 @@ app.get("/api/products/search", async (req, res) => {
 });
 
 // Rota para obter um produto específico por ID
-app.get("/api/products/:id", async (req, res) => {
+router.get("/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const product = await getProductById(id);
@@ -117,7 +119,7 @@ app.get("/api/products/:id", async (req, res) => {
   }
 });
 
-app.put("/api/products/:id", async (req, res) => {
+router.put("/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const updatedProduct = await updateProduct(id, req.body);
@@ -131,7 +133,7 @@ app.put("/api/products/:id", async (req, res) => {
   }
 });
 
-app.delete("/api/products/:id", async (req, res) => {
+router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const deleted = await deleteProduct(id);
@@ -144,3 +146,5 @@ app.delete("/api/products/:id", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
+export default router;

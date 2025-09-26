@@ -5,6 +5,11 @@ import pkg from "pg";
 const { Pool } = pkg;
 import { MercadoPagoConfig } from "mercadopago";
 import { createTables } from "./server/database.js";
+import userRouter from "./routes/user.js";
+import productsRouter from "./routes/products.js";
+import paymentsRouter from "./routes/payments.js";
+import cartRouter from "./routes/cart.js";
+import salesRouter from "./routes/sales.js";
 
 dotenv.config();
 
@@ -45,6 +50,17 @@ const setupPromise = createTables();
 app.use(async (req, res, next) => {
   await setupPromise;
   next();
+});
+
+app.use("/api/user", userRouter);
+app.use("/api/products", productsRouter);
+app.use("/api/payments", paymentsRouter);
+app.use("/api/cart", cartRouter);
+app.use("/api/sales", salesRouter);
+
+// Rota base
+app.get("/", (req, res) => {
+  res.status(200).send("API E-commerce rodando com sucesso!");
 });
 
 export default app;

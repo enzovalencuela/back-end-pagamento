@@ -1,12 +1,14 @@
 // --- Rotas de Carrinho ---
-import app from "../index.js";
+import { Router } from "express";
 import {
   addToCart,
   removeFromCart,
   getCartByUserId,
 } from "../server/database.js";
 
-app.post("/api/cart/add", async (req, res) => {
+const router = Router();
+
+router.post("/add", async (req, res) => {
   const { userId, productId } = req.body;
   if (!userId || !productId) {
     return res
@@ -22,7 +24,7 @@ app.post("/api/cart/add", async (req, res) => {
   }
 });
 
-app.post("/api/cart/remove", async (req, res) => {
+router.post("/remove", async (req, res) => {
   const { userId, productId } = req.body;
   if (!userId || !productId) {
     return res
@@ -43,7 +45,7 @@ app.post("/api/cart/remove", async (req, res) => {
   }
 });
 
-app.get("/api/cart/:userId", async (req, res) => {
+router.get("/:userId", async (req, res) => {
   const { userId } = req.params;
   try {
     const cartItems = await getCartByUserId(userId);
@@ -53,3 +55,5 @@ app.get("/api/cart/:userId", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
+export default router;

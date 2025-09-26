@@ -1,7 +1,9 @@
-import app from "../index.js";
-import { pool } from "../index.js";
+import { Router } from "express";
+import { pool } from "../index.ts";
 
-app.get("/api/sales/total", async (req: any, res: any) => {
+const router = Router();
+
+router.get("/total", async (req: any, res: any) => {
   try {
     const result = await pool.query(
       `SELECT COUNT(*) as total FROM payments WHERE status = 'approved`
@@ -13,7 +15,7 @@ app.get("/api/sales/total", async (req: any, res: any) => {
   }
 });
 
-app.get("/api/sales/revenue", async (req: any, res: any) => {
+router.get("/revenue", async (req: any, res: any) => {
   try {
     const result = await pool.query(
       `SELECT COALESCE(SUM(amount), 0) as revenue FROM payments WHERE status = 'approved'`
@@ -26,7 +28,7 @@ app.get("/api/sales/revenue", async (req: any, res: any) => {
   }
 });
 
-app.get("/api/sales/weekly", async (req: any, res: any) => {
+router.get("/weekly", async (req: any, res: any) => {
   try {
     const result = await pool.query(
       `SELECT DATA_TRUNC('week', created_at) as week, COUNT(*) as total FROM payments WHERE status = 'approved' GROUP BY week ORDER BY week ASC`
@@ -39,7 +41,7 @@ app.get("/api/sales/weekly", async (req: any, res: any) => {
   }
 });
 
-app.get("/api/sales/products", async (req: any, res: any) => {
+router.get("/products", async (req: any, res: any) => {
   try {
     const result = await pool.query(
       `SELECT json_array_elements(additonal_info-> 'items')->>'title' as product, SUM((jsonb_array_elements(additional_info->'items')->>'quantity')::int) as total FROM payments WHERE status = 'approved' GROUP BY product ORDER BY total DESC LIMIT 10`
@@ -52,7 +54,7 @@ app.get("/api/sales/products", async (req: any, res: any) => {
   }
 });
 
-app.get("/api/sales/categories", async (req, res) => {
+router.get("/categories", async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT
@@ -70,3 +72,5 @@ app.get("/api/sales/categories", async (req, res) => {
     res.status(500).send("Erro ao buscar vendas por categoria");
   }
 });
+
+export default router;

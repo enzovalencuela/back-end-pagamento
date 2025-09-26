@@ -1,4 +1,4 @@
-import app from "../index.js";
+import { Router } from "express";
 import { pool } from "../index.js";
 import {
   findUserByEmail,
@@ -7,13 +7,11 @@ import {
   updateUserPassword,
 } from "../server/database.js";
 
-app.get("/", (req: any, res: any) => {
-  res.send("Servidor do back-end rodando!");
-});
+const router = Router();
 
 // --- Rotas de Autenticação ---
 
-app.post("/api/user/register", async (req: any, res: any) => {
+router.post("/register", async (req: any, res: any) => {
   const { name, email, password } = req.body;
   if (!name || !email || !password) {
     return res
@@ -37,7 +35,7 @@ app.post("/api/user/register", async (req: any, res: any) => {
   }
 });
 
-app.post("/api/user/login", async (req, res) => {
+router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await findUserByEmail(email);
@@ -58,7 +56,7 @@ app.post("/api/user/login", async (req, res) => {
   }
 });
 
-app.post("/api/user/change-password", async (req, res) => {
+router.post("/change-password", async (req, res) => {
   const { userId, currentPassword, newPassword } = req.body;
   if (!userId || !currentPassword || !newPassword) {
     return res.status(400).json({ message: "Dados incompletos." });
@@ -83,7 +81,7 @@ app.post("/api/user/change-password", async (req, res) => {
   }
 });
 
-app.get("/api/user/payments", async (req, res) => {
+router.get("/payments", async (req, res) => {
   const userId = req.query.id;
   if (!userId) {
     return res.status(400).json({ error: "ID do usuário não fornecido." });
@@ -105,7 +103,7 @@ app.get("/api/user/payments", async (req, res) => {
   }
 });
 
-app.delete("/api/user/payments/:id", async (req, res) => {
+router.delete("/payments/:id", async (req, res) => {
   const { id } = req.params;
   if (!id) {
     return res.status(400).json({ error: "ID da compra não fornecido." });
@@ -126,7 +124,7 @@ app.delete("/api/user/payments/:id", async (req, res) => {
   }
 });
 
-app.put("/api/users/:id/update-checkout-info", async (req, res) => {
+router.put("/:id/update-checkout-info", async (req, res) => {
   const { id } = req.params;
   const { phone, address, number, neighborhood, city, state, zip } = req.body;
 
@@ -144,3 +142,5 @@ app.put("/api/users/:id/update-checkout-info", async (req, res) => {
     res.status(500).json({ error: "Erro ao atualizar dados do usuário" });
   }
 });
+
+export default router;

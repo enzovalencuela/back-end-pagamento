@@ -1,10 +1,12 @@
 // --- Rotas de Pagamento do Mercado Pago ---
 import { pool, client } from "../index.js";
-import app from "../index.js";
+import { Router } from "express";
 import { Payment } from "mercadopago";
 import { v4 as uuidv4 } from "uuid";
 
-app.post("/api/payments/create", async (req, res) => {
+const router = Router();
+
+router.post("/create", async (req, res) => {
   const {
     product_ids,
     user_id,
@@ -138,7 +140,7 @@ app.post("/api/payments/create", async (req, res) => {
   }
 });
 
-app.post("/api/payments/webhook", async (req, res) => {
+router.post("/webhook", async (req, res) => {
   console.log("Webhook recebido:", req.body);
 
   const paymentId = req.body.data?.id || req.body.id;
@@ -186,7 +188,7 @@ app.post("/api/payments/webhook", async (req, res) => {
   }
 });
 
-app.get("/api/payments/:id/status", async (req, res) => {
+router.get("/:id/status", async (req, res) => {
   const paymentId = req.params.id;
 
   try {
@@ -224,3 +226,5 @@ app.get("/api/payments/:id/status", async (req, res) => {
     res.status(500).json({ error: "Erro ao buscar status do pagamento" });
   }
 });
+
+export default router;
