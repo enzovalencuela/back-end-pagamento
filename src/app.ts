@@ -35,11 +35,11 @@ export const client = new MercadoPagoConfig({ accessToken: accessToken });
 
 app.use(express.json());
 app.use(
-  cors({
+  cors(/*{
     origin: "https://enzovalencuela-e-commerce.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }*/)
 );
 
 // Inicia a aplicação e a conexão com o banco de dados
