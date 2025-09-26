@@ -8,20 +8,18 @@ import { createTables } from "./server/database.ts";
 
 dotenv.config();
 
-const portNumber = process.env.DB_PORT
-  ? parseInt(process.env.DB_PORT)
-  : undefined;
+const PORT = process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3001;
 
 export const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
-  port: portNumber,
+  port: PORT,
 });
 
 export const app = express();
-const PORT = process.env.PORT || 3001;
+
 const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN;
 
 if (!accessToken) {
@@ -34,13 +32,13 @@ if (!accessToken) {
 export const client = new MercadoPagoConfig({ accessToken: accessToken });
 
 app.use(express.json());
-app.use(
-  cors(/*{
+app.use(cors());
+
+/*{
     origin: "https://enzovalencuela-e-commerce.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  }*/)
-);
+  }*/
 
 // Inicia a aplicação e a conexão com o banco de dados
 const startApp = async () => {
