@@ -31,7 +31,14 @@ router.get("/revenue", async (req: any, res: any) => {
 router.get("/weekly", async (req: any, res: any) => {
   try {
     const result = await pool.query(
-      `SELECT DATA_TRUNC('week', created_at) as week, COUNT(*) as total FROM payments WHERE status = 'approved' GROUP BY week ORDER BY week ASC`
+      `SELECT
+  DATE_TRUNC('week', created_at::timestamp) AS week,
+  COUNT(*) AS total
+FROM payments
+WHERE status = 'approved'
+GROUP BY week
+ORDER BY week ASC;
+`
     );
 
     res.json(result.rows);
