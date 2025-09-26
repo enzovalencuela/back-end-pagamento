@@ -1,12 +1,12 @@
 // --- Rotas de Produtos ---
-import { app, pool } from "../index.ts";
+import { app, pool } from "../index.js";
 import {
   createProduct,
   getAllProducts,
   getProductById,
   updateProduct,
   deleteProduct,
-} from "../server/database.ts";
+} from "../server/database.js";
 
 app.post("/api/products/add", async (req, res) => {
   const {

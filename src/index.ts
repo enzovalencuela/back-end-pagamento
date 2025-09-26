@@ -4,7 +4,7 @@ import express from "express";
 import pkg from "pg";
 const { Pool } = pkg;
 import { MercadoPagoConfig } from "mercadopago";
-import { createTables } from "./server/database.ts";
+import { createTables } from "./server/database.js";
 
 dotenv.config();
 

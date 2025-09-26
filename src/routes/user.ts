@@ -1,10 +1,10 @@
-import { app, pool } from "../index.ts";
+import { app, pool } from "../index.js";
 import {
   findUserByEmail,
   createUser,
   getBalance,
   updateUserPassword,
-} from "../server/database.ts";
+} from "../server/database.js";
 
 app.get("/", (req: any, res: any) => {
   res.send("Servidor do back-end rodando!");
