@@ -26,33 +26,25 @@ if (!accessToken) {
   console.error(
     "ERRO FATAL: MERCADO_PAGO_ACCESS_TOKEN não está definido no ambiente."
   );
-  process.exit(1);
 }
 
-export const client = new MercadoPagoConfig({ accessToken: accessToken });
+export const client = new MercadoPagoConfig({ accessToken: accessToken! });
 
 app.use(express.json());
-app.use(cors());
 
-/*{
+app.use(
+  cors(/* {
     origin: "https://enzovalencuela-e-commerce.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  }*/
+} */)
+);
 
-// Inicia a aplicação e a conexão com o banco de dados
-const startApp = async () => {
-  try {
-    await createTables();
+const setupPromise = createTables();
 
-    app.listen(PORT, () => {
-      console.log(`Servidor rodando na porta ${PORT}`);
-    });
-  } catch (error) {
-    console.error("Erro ao iniciar a aplicação:", error);
-  }
-};
-
-startApp();
+app.use(async (req, res, next) => {
+  await setupPromise;
+  next();
+});
 
 export default app;
