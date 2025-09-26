@@ -44,7 +44,16 @@ router.get("/weekly", async (req: any, res: any) => {
 router.get("/products", async (req: any, res: any) => {
   try {
     const result = await pool.query(
-      `SELECT json_array_elements(additonal_info-> 'items')->>'title' as product, SUM((jsonb_array_elements(additional_info->'items')->>'quantity')::int) as total FROM payments WHERE status = 'approved' GROUP BY product ORDER BY total DESC LIMIT 10`
+      `SELECT
+  item->>'title' AS product,
+  SUM((item->>'quantity')::int) AS total
+FROM payments,
+LATERAL jsonb_array_elements(additional_info->'items') AS item
+WHERE status = 'approved'
+GROUP BY product
+ORDER BY total DESC
+LIMIT 10;
+`
     );
 
     res.json(result.rows);
@@ -57,13 +66,15 @@ router.get("/products", async (req: any, res: any) => {
 router.get("/categories", async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT
-        jsonb_array_elements(additional_info->'items')->>'category_id' as category,
-        SUM((jsonb_array_elements(additional_info->'items')->>'quantity')::int) as total
-      FROM payments
-      WHERE status = 'approved'
-      GROUP BY category
-      ORDER BY total DESC
+SELECT
+  item->>'category_id' AS category,
+  SUM((item->>'quantity')::int) AS total
+FROM payments,
+LATERAL jsonb_array_elements(additional_info->'items') AS item
+WHERE status = 'approved'
+GROUP BY category
+ORDER BY total DESC;
+
     `);
 
     res.json(result.rows);
