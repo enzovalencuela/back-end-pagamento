@@ -1,5 +1,6 @@
 // --- Rotas de Produtos ---
-import { app, pool } from "../index.js";
+import app from "../index.js";
+import { pool } from "../index.js";
 import {
   createProduct,
   getAllProducts,

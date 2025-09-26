@@ -1,4 +1,5 @@
-import { app, pool } from "../index.js";
+import app from "../index.js";
+import { pool } from "../index.js";
 
 app.get("/api/sales/total", async (req: any, res: any) => {
   try {

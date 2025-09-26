@@ -1,5 +1,5 @@
 // --- Rotas de Carrinho ---
-import { app } from "../index.js";
+import app from "../index.js";
 import {
   addToCart,
   removeFromCart,

@@ -18,7 +18,7 @@ export const pool = new Pool({
   port: PORT,
 });
 
-export const app = express();
+const app = express();
 
 const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN;
 
@@ -54,3 +54,5 @@ const startApp = async () => {
 };
 
 startApp();
+
+export default app;
