@@ -1,18 +1,7 @@
 // src/server/database.js
 
-import pkg from "pg";
-const { Pool } = pkg;
-import dotenv from "dotenv";
-
-dotenv.config();
-
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
-});
+import { pool } from "../app.ts";
+import { Products } from "../types/products.ts";
 
 export const createTables = async () => {
   try {
@@ -78,53 +67,17 @@ CREATE TABLE IF NOT EXISTS payments (
 `);
     console.log("Tabela 'payments' verificada ou criada com sucesso!");
 
-    // Tabela 'transactions' para gerenciar o histórico de balanço do usuário
-    await client.query(`
-  CREATE TABLE IF NOT EXISTS transactions (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    amount DECIMAL(10, 2) NOT NULL,
-    transaction_type VARCHAR(50) NOT NULL, -- 'credit' (adição) ou 'debit' (compra)
-    provider VARCHAR(50) NOT NULL DEFAULT 'mercadopago',
-    provider_payment_id VARCHAR(255) UNIQUE, -- Para evitar duplicidade de webhooks
-    created_at TIMESTAMP DEFAULT NOW()
-  );
-`);
-    console.log("Tabela 'transactions' verificada ou criada com sucesso!");
-
-    // Adicionar depois da tabela 'transactions'
-
-    // Tabela 'orders' para rastrear pedidos
-    await client.query(`
-  CREATE TABLE IF NOT EXISTS orders (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    total_amount DECIMAL(10, 2) NOT NULL,
-    status VARCHAR(50) NOT NULL DEFAULT 'pending', -- 'pending', 'paid', 'shipped' etc.
-    created_at TIMESTAMP DEFAULT NOW()
-  );
-`);
-    console.log("Tabela 'orders' verificada ou criada com sucesso!");
-
-    // Tabela 'order_items' para rastrear os produtos de cada pedido
-    await client.query(`
-  CREATE TABLE IF NOT EXISTS order_items (
-    id SERIAL PRIMARY KEY,
-    order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
-    product_id INTEGER REFERENCES products(id),
-    quantity INTEGER NOT NULL,
-    unit_price DECIMAL(10, 2) NOT NULL
-  );
-`);
-    console.log("Tabela 'order_items' verificada ou criada com sucesso!");
-
     client.release();
   } catch (err) {
     console.error("Erro ao criar as tabelas:", err);
   }
 };
 
-export const createUser = async (name, email, password) => {
+export const createUser = async (
+  name: string,
+  email: string,
+  password: string
+) => {
   const client = await pool.connect();
   try {
     const res = await client.query(
@@ -137,7 +90,10 @@ export const createUser = async (name, email, password) => {
   }
 };
 
-export const updateUserPassword = async (userId, newPassword) => {
+export const updateUserPassword = async (
+  userId: string,
+  newPassword: string
+) => {
   const client = await pool.connect();
   try {
     const res = await client.query(
@@ -150,7 +106,7 @@ export const updateUserPassword = async (userId, newPassword) => {
   }
 };
 
-export const findUserByEmail = async (email) => {
+export const findUserByEmail = async (email: string) => {
   const client = await pool.connect();
   try {
     const res = await client.query("SELECT * FROM users WHERE email = $1", [
@@ -162,7 +118,7 @@ export const findUserByEmail = async (email) => {
   }
 };
 
-export const getBalance = async (userId) => {
+export const getBalance = async (userId: string) => {
   const client = await pool.connect();
   const res = await client.query("SELECT balance FROM users WHERE id = $1", [
     userId,
@@ -171,7 +127,7 @@ export const getBalance = async (userId) => {
   return res.rows[0] ? res.rows[0].balance : 0;
 };
 
-export const addBalance = async (userId, amount) => {
+export const addBalance = async (userId: string, amount: number) => {
   const client = await pool.connect();
   const res = await client.query(
     "UPDATE users SET balance = balance + $1 WHERE id = $2 RETURNING balance",
@@ -183,7 +139,7 @@ export const addBalance = async (userId, amount) => {
 
 // --- Funções de Carrinho ---
 
-export const addToCart = async (userId, productId) => {
+export const addToCart = async (userId: string, productId: string) => {
   try {
     const result = await pool.query(
       `INSERT INTO cart_items (user_id, product_id)
@@ -192,13 +148,13 @@ export const addToCart = async (userId, productId) => {
       [userId, productId]
     );
     return result.rows[0];
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erro ao adicionar produto ao carrinho:", error.message);
     throw error;
   }
 };
 
-export const removeFromCart = async (userId, productId) => {
+export const removeFromCart = async (userId: string, productId: string) => {
   try {
     const result = await pool.query(
       `DELETE FROM cart_items
@@ -207,20 +163,20 @@ export const removeFromCart = async (userId, productId) => {
       [userId, productId]
     );
     return result.rows[0];
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erro ao remover produto do carrinho:", error.message);
     throw error;
   }
 };
 
-export const getCartByUserId = async (userId) => {
+export const getCartByUserId = async (userId: string) => {
   try {
     const result = await pool.query(
       `SELECT product_id FROM cart_items WHERE user_id = $1`,
       [userId]
     );
-    return result.rows.map((row) => row.product_id);
-  } catch (error) {
+    return result.rows.map((row: any) => row.product_id);
+  } catch (error: any) {
     console.error("Erro ao buscar carrinho:", error.message);
     throw error;
   }
@@ -232,25 +188,25 @@ export const getAllProducts = async () => {
   try {
     const result = await pool.query("SELECT * FROM products ORDER BY id ASC");
     return result.rows;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erro ao buscar todos os produtos:", error.message);
     throw error;
   }
 };
 
 // Função para obter um produto por ID
-export const getProductById = async (productId) => {
+export const getProductById = async (productId: string) => {
   try {
     const result = await pool.query("SELECT * FROM products WHERE id = $1", [
       productId,
     ]);
     return result.rows[0];
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erro ao buscar produto por ID:", error.message);
     throw error;
   }
 };
-export const addProducts = async (products) => {
+export const addProducts = async (products: Products[]) => {
   const client = await pool.connect();
   try {
     const promises = products.map((product) => {
@@ -279,13 +235,13 @@ export const addProducts = async (products) => {
       );
     });
     const results = await Promise.all(promises);
-    return results.map((res) => res.rows[0]);
+    return results.map((res: any) => res.rows[0]);
   } finally {
     client.release();
   }
 };
 
-export async function createProduct(productData) {
+export async function createProduct(productData: Products) {
   const {
     titulo,
     preco,
@@ -329,7 +285,7 @@ export async function createProduct(productData) {
 }
 
 // Atualizar um produto por ID
-export async function updateProduct(id, productData) {
+export async function updateProduct(id: string, productData: Products) {
   const {
     titulo,
     preco,
@@ -373,17 +329,15 @@ export async function updateProduct(id, productData) {
   }
 }
 
-export async function deleteProduct(id) {
+export async function deleteProduct(id: string) {
   const client = await pool.connect();
   try {
     const result = await client.query(
       "DELETE FROM products WHERE id = $1 RETURNING *",
       [id]
     );
-    return result.rowCount > 0;
+    return (result?.rowCount ?? 0) > 0;
   } finally {
     client.release();
   }
 }
-
-export default pool;
