@@ -46,7 +46,7 @@ router.post("/create", async (req, res) => {
     const user = users[0];
 
     const { rows: products } = await dbClient.query(
-      "SELECT id, titulo, preco, categoria, descricao, img FROM products WHERE id = ANY($1::int[])",
+      "SELECT id, titulo, preco, categoria, descricao FROM products WHERE id = ANY($1::int[])",
       [product_ids]
     );
 
@@ -74,7 +74,6 @@ router.post("/create", async (req, res) => {
       category_id: product.categoria,
       quantity: 1,
       unit_price: product.preco,
-      img: product.img,
     }));
 
     const paymentClient = new Payment(client);
