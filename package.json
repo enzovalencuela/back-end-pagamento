@@ -2,10 +2,10 @@
   "name": "back_end",
   "version": "1.0.0",
   "description": "",
-  "main": "app.ts",
+  "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node --loader ts-node/esm src/app.ts"
+    "start": "node --loader ts-node/esm src/index.ts"
   },
   "keywords": [],
   "author": "",

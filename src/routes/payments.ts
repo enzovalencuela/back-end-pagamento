@@ -1,5 +1,5 @@
 // --- Rotas de Pagamento do Mercado Pago ---
-import { app, pool, client } from "../app.ts";
+import { app, pool, client } from "../index.ts";
 import { Payment } from "mercadopago";
 import { v4 as uuidv4 } from "uuid";
 

@@ -1,6 +1,6 @@
 // src/server/database.js
 
-import { pool } from "../app.ts";
+import { pool } from "../index.ts";
 import { Products } from "../types/products.ts";
 
 export const createTables = async () => {

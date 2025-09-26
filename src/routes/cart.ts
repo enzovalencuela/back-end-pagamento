@@ -1,5 +1,5 @@
 // --- Rotas de Carrinho ---
-import { app } from "../app.ts";
+import { app } from "../index.ts";
 import {
   addToCart,
   removeFromCart,
