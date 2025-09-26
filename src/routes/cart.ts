@@ -1,6 +1,10 @@
 // --- Rotas de Carrinho ---
-import { app } from "../app";
-import { addToCart, removeFromCart, getCartByUserId } from "../server/database";
+import { app } from "../app.ts";
+import {
+  addToCart,
+  removeFromCart,
+  getCartByUserId,
+} from "../server/database.ts";
 
 app.post("/api/cart/add", async (req, res) => {
   const { userId, productId } = req.body;
