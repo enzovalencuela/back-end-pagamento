@@ -6,7 +6,7 @@ const router = Router();
 router.get("/total", async (req: any, res: any) => {
   try {
     const result = await pool.query(
-      `SELECT COUNT(*) as total FROM payments WHERE status = 'approved`
+      `SELECT COUNT(*) as total FROM payments WHERE status = 'approved'`
     );
     res.json({ total: parseInt(result.rows[0].total, 10) });
   } catch (error: any) {
