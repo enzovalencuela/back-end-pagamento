@@ -187,8 +187,8 @@ router.post("/webhook", async (req, res) => {
   }
 });
 
-router.get("/:id/status", async (req, res) => {
-  const paymentId = req.params.id;
+router.get("/:payment_id/status", async (req, res) => {
+  const paymentId = req.params.payment_id;
 
   try {
     const paymentClient = new Payment(client);
