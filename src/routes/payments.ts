@@ -83,7 +83,7 @@ router.post("/create", async (req, res) => {
       payment_method_id: payment_method_id,
       description: "E-Commerce",
       payer: {
-        email: user.email,
+        email: user.email || email,
         first_name: user.name,
         identification: {
           type: "CPF",
@@ -111,7 +111,7 @@ router.post("/create", async (req, res) => {
         },
       },
       external_reference,
-      statement_descriptor: "E-Commerce Gamer",
+      statement_descriptor: "ECOMMERCEGM",
     };
 
     if (token) {
