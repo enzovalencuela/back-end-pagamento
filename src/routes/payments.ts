@@ -61,7 +61,7 @@ router.post("/create", async (req, res) => {
       0
     );
 
-    if (transaction_amount <= 1 || totalAmount <= 1) {
+    if (totalAmount <= 1) {
       return res.status(400).json({
         error: "O valor total do pagamento deve ser maior que R$ 1,00.",
       });
@@ -81,7 +81,7 @@ router.post("/create", async (req, res) => {
     const paymentPayload: any = {
       transaction_amount: totalAmount,
       payment_method_id: payment_method_id,
-      description: "Compra no E-Commerce",
+      description: "E-Commerce",
       payer: {
         email: user.email,
         first_name: user.name,
@@ -128,6 +128,7 @@ router.post("/create", async (req, res) => {
 
     const paymentResponse = await paymentClient.create({
       body: paymentPayload,
+      requestOptions: { idempotencyKey: external_reference },
     });
 
     res.status(200).json({ payment: paymentResponse });
