@@ -81,7 +81,7 @@ router.post("/create", async (req, res) => {
     const paymentPayload: any = {
       transaction_amount: totalAmount,
       payment_method_id: payment_method_id,
-      description: "E-Commerce",
+      description: "ECOMMERCEGM",
       payer: {
         email: user.email || email,
         first_name: user.name,

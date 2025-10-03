@@ -21,6 +21,7 @@ router.post("/add", async (req, res) => {
     descricao,
     categoria,
     tags,
+    cores,
     disponivel,
   } = req.body;
 

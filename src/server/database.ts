@@ -251,6 +251,7 @@ export async function createProduct(productData: Products) {
     descricao,
     categoria,
     tags,
+    cores,
     disponivel,
   } = productData;
   const client = await pool.connect();
@@ -263,9 +264,13 @@ export async function createProduct(productData: Products) {
       typeof tags === "string"
         ? tags.split(",").map((tag) => tag.trim())
         : tags;
+    const coresArray =
+      typeof cores === "string"
+        ? cores.split(",").map((cor) => cor.trim())
+        : cores;
 
     const result = await client.query(
-      `INSERT INTO products (titulo, preco, preco_original, parcelamento, img, descricao, categoria, tags, disponivel) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+      `INSERT INTO products (titulo, preco, preco_original, parcelamento, img, descricao, categoria, tags, cores, disponivel) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
       [
         titulo,
         precoFloat,
@@ -275,6 +280,7 @@ export async function createProduct(productData: Products) {
         descricao,
         categoria,
         tagsArray,
+        coresArray,
         disponivel,
       ]
     );
@@ -295,6 +301,7 @@ export async function updateProduct(id: string, productData: Products) {
     descricao,
     categoria,
     tags,
+    cores,
     disponivel,
   } = productData;
   const client = await pool.connect();
@@ -307,9 +314,13 @@ export async function updateProduct(id: string, productData: Products) {
       typeof tags === "string"
         ? tags.split(",").map((tag) => tag.trim())
         : tags;
+    const coresArray =
+      typeof cores === "string"
+        ? cores.split(",").map((cor) => cor.trim())
+        : cores;
 
     const result = await client.query(
-      `UPDATE products SET titulo = $1, preco = $2, preco_original = $3, parcelamento = $4, img = $5, descricao = $6, categoria = $7, tags = $8, disponivel = $9 WHERE id = $10 RETURNING *`,
+      `UPDATE products SET titulo = $1, preco = $2, preco_original = $3, parcelamento = $4, img = $5, descricao = $6, categoria = $7, tags = $8, cores = $9, disponivel = $10 WHERE id = $11 RETURNING *`,
       [
         titulo,
         precoFloat,
@@ -319,6 +330,7 @@ export async function updateProduct(id: string, productData: Products) {
         descricao,
         categoria,
         tagsArray,
+        coresArray,
         disponivel,
         id,
       ]
