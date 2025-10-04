@@ -6,7 +6,8 @@ export interface Products {
   cores: string;
   preco: string;
   preco_original: string;
-  parcelamento: string;
+  max_parcelas: number;
+  taxa_parcela: number;
   categoria: string;
   disponivel: boolean;
 }

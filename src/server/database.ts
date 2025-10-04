@@ -225,12 +225,13 @@ export const addProducts = async (products: Products[]) => {
         : null;
 
       return client.query(
-        "INSERT INTO products (titulo, preco, preco_original, parcelamento, img, descricao, categoria, tags, disponivel) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *",
+        "INSERT INTO products (titulo, preco, preco_original, max_parcelas, taxa_parcela, img, descricao, categoria, tags, disponivel) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *",
         [
           product.titulo,
           preco,
           preco_original,
-          product.parcelamento,
+          product.max_parcelas,
+          product.taxa_parcela,
           product.img,
           product.descricao,
           product.categoria,
@@ -252,7 +253,8 @@ export async function createProduct(productData: Products) {
     titulo,
     preco,
     preco_original,
-    parcelamento,
+    max_parcelas,
+    taxa_parcela,
     img,
     descricao,
     categoria,
@@ -276,12 +278,13 @@ export async function createProduct(productData: Products) {
         : cores;
 
     const result = await client.query(
-      `INSERT INTO products (titulo, preco, preco_original, parcelamento, img, descricao, categoria, tags, cores, disponivel) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+      `INSERT INTO products (titulo, preco, preco_original, max_parcelas, taxa_parcela, img, descricao, categoria, tags, cores, disponivel) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
       [
         titulo,
         precoFloat,
         precoOriginalFloat,
-        parcelamento,
+        max_parcelas,
+        taxa_parcela,
         img,
         descricao,
         categoria,
@@ -302,7 +305,8 @@ export async function updateProduct(id: string, productData: Products) {
     titulo,
     preco,
     preco_original,
-    parcelamento,
+    max_parcelas,
+    taxa_parcela,
     img,
     descricao,
     categoria,
@@ -326,12 +330,13 @@ export async function updateProduct(id: string, productData: Products) {
         : cores;
 
     const result = await client.query(
-      `UPDATE products SET titulo = $1, preco = $2, preco_original = $3, parcelamento = $4, img = $5, descricao = $6, categoria = $7, tags = $8, cores = $9, disponivel = $10 WHERE id = $11 RETURNING *`,
+      `UPDATE products SET titulo = $1, preco = $2, preco_original = $3, max_parcelas = $4, taxa_parcela = $5, img = $6, descricao = $7, categoria = $8, tags = $9, cores = $10, disponivel = $11 WHERE id = $12 RETURNING *`,
       [
         titulo,
         precoFloat,
         precoOriginalFloat,
-        parcelamento,
+        max_parcelas,
+        taxa_parcela,
         img,
         descricao,
         categoria,
