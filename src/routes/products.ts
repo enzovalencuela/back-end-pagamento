@@ -130,6 +130,7 @@ router.put("/:id", async (req, res) => {
     }
     res.status(200).json(updatedProduct);
   } catch (err: any) {
+    console.log("Body recebido:", req.body);
     console.error("Erro ao atualizar produto:", err.message);
     res.status(500).send("Server error");
   }
