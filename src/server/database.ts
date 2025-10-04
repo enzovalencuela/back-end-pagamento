@@ -320,6 +320,10 @@ export async function updateProduct(id: string, productData: Products) {
     const precoOriginalFloat = preco_original
       ? parseFloat(preco_original)
       : null;
+
+    const maxParcelasInt = parseInt(max_parcelas.toString(), 10);
+    const taxaParcelaFloat = parseFloat(taxa_parcela.toString());
+
     const tagsArray =
       typeof tags === "string"
         ? tags.split(",").map((tag) => tag.trim())
@@ -335,8 +339,8 @@ export async function updateProduct(id: string, productData: Products) {
         titulo,
         precoFloat,
         precoOriginalFloat,
-        max_parcelas,
-        taxa_parcela,
+        maxParcelasInt,
+        taxaParcelaFloat,
         img,
         descricao,
         categoria,
