@@ -129,8 +129,8 @@ router.put("/:id", async (req, res) => {
       return res.status(404).json({ message: "Produto não encontrado." });
     }
     res.status(200).json(updatedProduct);
-    console.log(updatedProduct);
   } catch (err: any) {
+    console.log("Body recebido:", req.body);
     console.error("Erro ao atualizar produto:", err.message);
     res.status(500).send("Server error");
   }
