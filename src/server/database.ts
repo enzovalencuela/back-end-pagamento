@@ -206,6 +206,7 @@ export const getProductById = async (productId: string) => {
     throw error;
   }
 };
+
 export const addProducts = async (products: Products[]) => {
   const client = await pool.connect();
   try {
