@@ -214,6 +214,10 @@ export const addProducts = async (products: Products[]) => {
         typeof product.tags === "string"
           ? product.tags.split(",").map((tag) => tag.trim())
           : product.tags;
+      const coresArray =
+        typeof product.cores === "string"
+          ? product.cores.split(",").map((cor) => cor.trim())
+          : product.cores;
       const preco = parseFloat(product.preco);
       const preco_original = product.preco_original
         ? parseFloat(product.preco_original)
@@ -230,6 +234,7 @@ export const addProducts = async (products: Products[]) => {
           product.descricao,
           product.categoria,
           tagsArray,
+          coresArray,
           product.disponivel,
         ]
       );
