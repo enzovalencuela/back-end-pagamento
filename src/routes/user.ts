@@ -86,6 +86,7 @@ router.get("/payments", async (req, res) => {
   if (!userId) {
     return res.status(400).json({ error: "ID do usuário não fornecido." });
   }
+  console.log("ID RECEBIDO: ", userId);
 
   let dbClient;
   try {
