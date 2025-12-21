@@ -137,51 +137,6 @@ export const addBalance = async (userId: string, amount: number) => {
   return res.rows[0] ? res.rows[0].balance : null;
 };
 
-// --- Funções de Carrinho ---
-
-export const addToCart = async (userId: string, productId: string) => {
-  try {
-    const result = await pool.query(
-      `INSERT INTO cart_items (user_id, product_id)
-       VALUES ($1, $2)
-       RETURNING *`,
-      [userId, productId]
-    );
-    return result.rows[0];
-  } catch (error: any) {
-    console.error("Erro ao adicionar produto ao carrinho:", error.message);
-    throw error;
-  }
-};
-
-export const removeFromCart = async (userId: string, productId: string) => {
-  try {
-    const result = await pool.query(
-      `DELETE FROM cart_items
-       WHERE user_id = $1 AND product_id = $2
-       RETURNING *`,
-      [userId, productId]
-    );
-    return result.rows[0];
-  } catch (error: any) {
-    console.error("Erro ao remover produto do carrinho:", error.message);
-    throw error;
-  }
-};
-
-export const getCartByUserId = async (userId: string) => {
-  try {
-    const result = await pool.query(
-      `SELECT product_id FROM cart_items WHERE user_id = $1`,
-      [userId]
-    );
-    return result.rows.map((row: any) => row.product_id);
-  } catch (error: any) {
-    console.error("Erro ao buscar carrinho:", error.message);
-    throw error;
-  }
-};
-
 // --- Funções de Produtos ---
 
 export const getAllProducts = async () => {
